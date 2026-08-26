@@ -8,6 +8,10 @@ controller:
 
   # Use latest compatible plugin versions to avoid dependency conflicts
   installLatestPlugins: true
+  
+  # Override conflicting plugin to newer version
+  additionalPlugins:
+    - configuration-as-code:2006.v001a_2ca_6b_574
 
   # Reasonable for Minikube
   resources:
