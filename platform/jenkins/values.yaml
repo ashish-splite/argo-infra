@@ -6,12 +6,14 @@ controller:
   # Don't run builds directly on the controller
   numExecutors: 0
 
-  # Override default plugins with compatible versions
+  # Let Jenkins auto-resolve plugin versions
+  installLatestPlugins: true
+  installLatestSpecifiedPlugins: true
   installPlugins:
-    - kubernetes:4411.v0943a_f3af8a_b_
-    - workflow-aggregator:608.v67378e9d3db_1
-    - git:5.7.0
-    - configuration-as-code:2006.v001a_2ca_6b_574
+    - kubernetes
+    - workflow-aggregator
+    - git
+    - configuration-as-code
 
   # Reasonable for Minikube
   resources:
