@@ -6,6 +6,9 @@ controller:
   # Don't run builds directly on the controller
   numExecutors: 0
 
+  # Use latest compatible plugin versions to avoid dependency conflicts
+  installLatestPlugins: true
+
   # Reasonable for Minikube
   resources:
     requests:
