@@ -6,11 +6,11 @@ controller:
   # Don't run builds directly on the controller
   numExecutors: 0
 
-  # Use latest compatible plugin versions to avoid dependency conflicts
-  installLatestPlugins: true
-  
-  # Override conflicting plugin to newer version
-  additionalPlugins:
+  # Override default plugins with compatible versions
+  installPlugins:
+    - kubernetes:4411.v0943a_f3af8a_b_
+    - workflow-aggregator:608.v67378e9d3db_1
+    - git:5.7.0
     - configuration-as-code:2006.v001a_2ca_6b_574
 
   # Reasonable for Minikube
