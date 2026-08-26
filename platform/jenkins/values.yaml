@@ -1,0 +1,24 @@
+controller:
+  # Jenkins UI
+  serviceType: NodePort
+  nodePort: 32000
+
+  # Don't run builds directly on the controller
+  numExecutors: 0
+
+  # Reasonable for Minikube
+  resources:
+    requests:
+      cpu: "500m"
+      memory: "1Gi"
+    limits:
+      cpu: "2"
+      memory: "2Gi"
+
+persistence:
+  enabled: true
+  size: 10Gi
+
+# Let Jenkins create/use its Kubernetes service account
+rbac:
+  create: true

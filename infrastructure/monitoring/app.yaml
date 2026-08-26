@@ -1,0 +1,8 @@
+enabled: false
+name: monitoring
+namespace: monitoring
+valuesPath: infrastructure/monitoring/values.yaml
+chart:
+  repoURL: https://prometheus-community.github.io/helm-charts
+  name: kube-prometheus-stack
+  version: 69.8.2

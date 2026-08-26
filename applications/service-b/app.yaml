@@ -1,0 +1,4 @@
+enabled: false
+name: service-b
+namespace: service-b
+path: applications/service-b/manifests

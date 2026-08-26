@@ -1,0 +1,8 @@
+enabled: false
+name: jenkins
+namespace: jenkins
+valuesPath: platform/jenkins/values.yaml
+chart:
+  repoURL: https://charts.jenkins.io
+  name: jenkins
+  version: 5.8.66
