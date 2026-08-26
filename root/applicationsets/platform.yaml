@@ -8,7 +8,7 @@ spec:
   goTemplateOptions: ["missingkey=error"]
   generators:
     - git:
-        repoURL: https://github.com/your-org/argo-infra.git
+        repoURL: https://github.com/ashish-splite/argo-infra.git
         revision: main
         files:
           - path: platform/**/app.yaml
@@ -31,7 +31,7 @@ spec:
             releaseName: '{{ .name }}'
             valueFiles:
               - $values/{{ .valuesPath }}
-        - repoURL: https://github.com/your-org/argo-infra.git
+        - repoURL: https://github.com/ashish-splite/argo-infra.git
           targetRevision: main
           ref: values
       destination:
