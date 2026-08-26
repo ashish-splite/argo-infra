@@ -1,4 +1,4 @@
-enabled: false
+enabled: true
 name: jenkins
 namespace: jenkins
 valuesPath: platform/jenkins/values.yaml
