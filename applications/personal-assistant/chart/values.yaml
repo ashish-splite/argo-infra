@@ -1,9 +1,9 @@
 replicaCount: 1
 
 image:
-  repository: ai-agent
+  repository: thedarkest22/ai-agent  # Docker Hub
   tag: "latest"
-  pullPolicy: Never  # Local Docker image
+  pullPolicy: Always
 
 service:
   type: ClusterIP
