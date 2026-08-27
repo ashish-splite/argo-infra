@@ -26,7 +26,9 @@ spec:
       source:
         repoURL: https://github.com/ashish-splite/argo-infra.git
         targetRevision: main
-        path: '{{ .path }}'
+        path: '{{ .path.path | dir }}/chart'
+        helm:
+          releaseName: '{{ .name }}'
       destination:
         server: https://kubernetes.default.svc
         namespace: '{{ .namespace }}'
