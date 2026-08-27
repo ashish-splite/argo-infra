@@ -1,7 +1,6 @@
 controller:
   # Jenkins UI
-  serviceType: NodePort
-  nodePort: 32000
+  serviceType: ClusterIP  # Changed from NodePort - using Ingress instead
 
   # Don't run builds directly on the controller
   numExecutors: 0
@@ -23,6 +22,16 @@ controller:
     limits:
       cpu: "2"
       memory: "2Gi"
+
+  # Ingress configuration
+  ingress:
+    enabled: true
+    ingressClassName: nginx
+    path: /jenkins
+    pathType: ImplementationSpecific
+    annotations:
+      nginx.ingress.kubernetes.io/rewrite-target: /$2
+      nginx.ingress.kubernetes.io/use-regex: "true"
 
 persistence:
   enabled: true

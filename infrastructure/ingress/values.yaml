@@ -1,2 +1,17 @@
 controller:
+  # Local Minikube: one replica is enough.
   replicaCount: 1
+
+  # Keep the production-style Service type.
+  # minikube tunnel will provide the external connectivity.
+  service:
+    type: LoadBalancer
+
+  # Explicitly create/use the nginx IngressClass.
+  ingressClass: nginx
+
+  ingressClassResource:
+    enabled: true
+    name: nginx
+    default: false
+    controllerValue: k8s.io/ingress-nginx
