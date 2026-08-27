@@ -1,0 +1,16 @@
+replicaCount: 1
+
+image:
+  repository: thedarkest22/chat-interface
+  tag: "latest"
+  pullPolicy: Always
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: true
+  className: nginx
+  paths:
+    - path: /chat-app
