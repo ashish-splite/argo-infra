@@ -9,6 +9,18 @@ service:
   type: ClusterIP
   port: 3000
 
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+env:
+  NODE_ENV: production
+  LOG_LEVEL: info
+
 ingress:
   enabled: true
   className: nginx

@@ -9,6 +9,19 @@ service:
   type: ClusterIP
   port: 80
 
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    cpu: 200m
+    memory: 256Mi
+
+env:
+  NODE_ENV: production
+  LOG_LEVEL: info
+  API_BASE_URL: http://localhost:80/jarvis  # Update this to the correct URL for your backend service
+
 ingress:
   enabled: true
   className: nginx
