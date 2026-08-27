@@ -1,0 +1,10 @@
+replicaCount: 1
+
+image:
+  repository: ai-agent
+  tag: "latest"
+  pullPolicy: Never  # Local Docker image
+
+service:
+  type: ClusterIP
+  port: 3000

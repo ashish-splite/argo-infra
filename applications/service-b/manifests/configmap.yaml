@@ -1,6 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: service-b-config
-data:
-  APP_NAME: service-b

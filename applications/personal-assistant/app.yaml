@@ -1,0 +1,4 @@
+enabled: true
+name: personal-assistant
+namespace: personal-assistant
+path: applications/personal-assistant/chart
