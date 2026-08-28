@@ -8,7 +8,7 @@ spec:
   goTemplateOptions: ["missingkey=error"]
   generators:
     - git:
-        repoURL: https://github.com/AshishRanjan9303/argo-infra.git
+        repoURL: https://github.com/ashish-splite/argo-infra.git
         revision: HEAD
         files:
           - path: "datastores/*/app.yaml"
@@ -30,7 +30,7 @@ spec:
           helm:
             valueFiles:
               - $values/{{ .valuesPath }}
-        - repoURL: https://github.com/AshishRanjan9303/argo-infra.git
+        - repoURL: https://github.com/ashish-splite/argo-infra.git
           targetRevision: HEAD
           ref: values
       destination:
