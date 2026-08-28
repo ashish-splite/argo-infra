@@ -1,4 +1,3 @@
 enabled: true
 name: argocd-ingress
 namespace: argocd
-path: platform-manifests/argocd-ingress/chart

@@ -25,7 +25,7 @@ spec:
       source:
         repoURL: https://github.com/ashish-splite/argo-infra.git
         targetRevision: main
-        path: "{{ .path }}"
+        path: "{{ .path.path }}/chart"
         helm:
           releaseName: "{{ .name }}"
       destination:
