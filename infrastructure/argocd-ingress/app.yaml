@@ -1,0 +1,4 @@
+enabled: true
+name: argocd-ingress
+namespace: argocd
+path: infrastructure/argocd-ingress/chart

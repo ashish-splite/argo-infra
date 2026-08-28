@@ -24,6 +24,8 @@ spec:
     spec:
       project: default
       sources:
+        {{- if .chart }}
+        # External Helm chart
         - repoURL: '{{ .chart.repoURL }}'
           chart: '{{ .chart.name }}'
           targetRevision: '{{ .chart.version }}'
@@ -34,6 +36,14 @@ spec:
         - repoURL: https://github.com/ashish-splite/argo-infra.git
           targetRevision: main
           ref: values
+        {{- else }}
+        # Local chart in git repo
+        - repoURL: https://github.com/ashish-splite/argo-infra.git
+          targetRevision: main
+          path: '{{ .path }}'
+          helm:
+            releaseName: '{{ .name }}'
+        {{- end }}
       destination:
         server: https://kubernetes.default.svc
         namespace: '{{ .namespace }}'
