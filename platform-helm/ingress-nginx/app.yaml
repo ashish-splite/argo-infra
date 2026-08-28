@@ -1,7 +1,7 @@
 enabled: true
 name: ingress-nginx
 namespace: ingress-nginx
-valuesPath: infrastructure/ingress/values.yaml
+valuesPath: platform-helm/ingress-nginx/values.yaml
 chart:
   repoURL: https://kubernetes.github.io/ingress-nginx
   name: ingress-nginx

@@ -1,0 +1,44 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: ci-cd
+  namespace: argocd
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+    - git:
+        repoURL: https://github.com/AshishRanjan9303/argo-infra.git
+        revision: HEAD
+        files:
+          - path: "ci-cd/*/app.yaml"
+  selector:
+    matchExpressions:
+      - key: enabled
+        operator: In
+        values:
+          - "true"
+  template:
+    metadata:
+      name: "{{ .name }}"
+    spec:
+      project: default
+      sources:
+        - repoURL: "{{ .chart.repoURL }}"
+          chart: "{{ .chart.name }}"
+          targetRevision: "{{ .chart.version }}"
+          helm:
+            valueFiles:
+              - $values/{{ .valuesPath }}
+        - repoURL: https://github.com/AshishRanjan9303/argo-infra.git
+          targetRevision: HEAD
+          ref: values
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: "{{ .namespace }}"
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true

@@ -1,0 +1,8 @@
+enabled: false
+name: postgres
+namespace: datastores
+valuesPath: datastores/postgres/values.yaml
+chart:
+  repoURL: https://charts.bitnami.com/bitnami
+  name: postgresql
+  version: "15.5.20"

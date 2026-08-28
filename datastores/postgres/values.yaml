@@ -1,0 +1,6 @@
+auth:
+  postgresPassword: postgres
+  database: appdb
+primary:
+  persistence:
+    enabled: false

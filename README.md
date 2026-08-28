@@ -7,54 +7,85 @@ ApplicationSet-based GitOps setup for local Kubernetes learning with Argo CD.
 ```text
 .
 ├── root/
-│   ├── root-app.yaml
-│   ├── bootstrap/
-│   │   └── kustomization.yaml
+│   ├── root-app.yaml                    # Bootstrap application
 │   └── applicationsets/
-│       ├── helm-apps.yaml      # Git file generator: discovers infrastructure/**/config.yaml and platform/**/config.yaml
-│       └── git-apps.yaml       # Git file generator: discovers applications/**/config.yaml
-├── infrastructure/
-│   ├── ingress/
-│   │   ├── config.yaml         # App identity: name, namespace, chart details
-│   │   └── values.yaml         # Helm values
-│   └── monitoring/
-│       ├── config.yaml
+│       ├── services.yaml                # Local Helm charts (services/*)
+│       ├── datastores.yaml              # External Helm charts (redis, postgres)
+│       ├── observability.yaml           # Monitoring stack (prometheus)
+│       ├── ci-cd.yaml                   # CI/CD tools (jenkins)
+│       ├── platform-helm.yaml           # Platform Helm charts (ingress-nginx)
+│       └── platform-manifests.yaml      # Platform manifests (argocd-ingress)
+│
+├── services/                            # Application services (local Helm charts)
+│   ├── chat-app/
+│   │   ├── app.yaml                     # App config: name, namespace, path, enabled
+│   │   └── chart/                       # Helm chart
+│   └── jarvis/
+│       ├── app.yaml
+│       └── chart/
+│
+├── datastores/                          # Databases (external Helm charts)
+│   ├── redis/
+│   │   ├── app.yaml                     # Chart reference + valuesPath
+│   │   └── values.yaml                  # Helm values
+│   └── postgres/
+│       ├── app.yaml
 │       └── values.yaml
-├── platform/
+│
+├── observability/                       # Monitoring & logging
+│   └── prometheus/
+│       ├── app.yaml
+│       └── values.yaml
+│
+├── ci-cd/                               # CI/CD tools
 │   └── jenkins/
-│       ├── config.yaml
+│       ├── app.yaml
 │       └── values.yaml
-└── applications/
-    ├── service-a/
-    │   ├── config.yaml         # App identity: name, namespace, path
-    │   └── chart/
-    │       ├── Chart.yaml
-    │       ├── values.yaml
-    │       └── templates/
-    │           ├── deployment.yaml
-    │           └── service.yaml
-    └── service-b/
-        ├── config.yaml
-        └── manifests/
-            ├── deployment.yaml
-            ├── service.yaml
-            └── configmap.yaml
+│
+├── platform-helm/                       # Platform components (external Helm)
+│   └── ingress-nginx/
+│       ├── app.yaml
+│       └── values.yaml
+│
+└── platform-manifests/                  # Platform components (local manifests)
+    └── argocd-ingress/
+        ├── app.yaml
+        └── chart/
 ```
 
 ## Model
 
-- `root/root-app.yaml` is the bootstrap application.
-- Root app syncs `root/bootstrap`, which applies ApplicationSets.
-- ApplicationSets use Git file generators to auto-discover apps.
-- Each app folder has a `config.yaml` defining its identity (name, namespace, source).
-- Helm values stay in `values.yaml` alongside the config.
-- To add a new app, just create a folder with `config.yaml` — ApplicationSet discovers it.
+- `root/root-app.yaml` is the bootstrap application
+- Root app syncs `root/applicationsets/`, which applies all ApplicationSets
+- Each category has its own ApplicationSet with Git file generator
+- Apps are discovered by `app.yaml` files in each folder
+- External Helm charts use `sources` with separate `values.yaml`
+- Local charts reference `path` to the chart directory
+
+## App Configuration
+
+Each `app.yaml` contains:
+```yaml
+enabled: true                    # Toggle app on/off
+name: my-app                     # Argo CD application name
+namespace: my-namespace          # Target namespace
+
+# For local charts:
+path: services/my-app/chart      # Path to Helm chart
+
+# For external charts:
+valuesPath: datastores/redis/values.yaml
+chart:
+  repoURL: https://charts.bitnami.com/bitnami
+  name: redis
+  version: "19.6.4"
+```
 
 ## Quick On/Off
 
-- To disable an app: delete or rename its `config.yaml` file.
-- To re-enable: restore the `config.yaml`.
-- No changes needed in ApplicationSet templates.
+- To disable an app: set `enabled: false` in its `app.yaml`
+- To re-enable: set `enabled: true`
+- No changes needed in ApplicationSet templates
 
 ## Prerequisites
 
@@ -64,10 +95,7 @@ ApplicationSet-based GitOps setup for local Kubernetes learning with Argo CD.
 
 ## Bootstrap
 
-1. Update repo URL placeholders in:
-   - `root/root-app.yaml`
-   - `root/applicationsets/helm-apps.yaml`
-   - `root/applicationsets/git-apps.yaml`
+1. Update repo URL in `root/root-app.yaml` and all ApplicationSets
 2. Apply root app:
 
 ```bash
@@ -79,5 +107,16 @@ kubectl apply -f root/root-app.yaml
 ```bash
 kubectl -n argocd get applicationsets
 kubectl -n argocd get applications
-kubectl get ns ingress-nginx monitoring jenkins service-a service-b
+kubectl get ns apps datastores observability ci-cd ingress-nginx
 ```
+
+## Categories
+
+| Category | Folder | Description |
+|----------|--------|-------------|
+| services | `services/` | Application microservices (local Helm charts) |
+| datastores | `datastores/` | Databases - Redis, PostgreSQL |
+| observability | `observability/` | Monitoring - Prometheus stack |
+| ci-cd | `ci-cd/` | CI/CD tools - Jenkins |
+| platform-helm | `platform-helm/` | Platform components (external Helm) |
+| platform-manifests | `platform-manifests/` | Platform components (local manifests) |

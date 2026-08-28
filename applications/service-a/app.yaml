@@ -1,4 +1,0 @@
-enabled: false
-name: service-a
-namespace: service-a
-path: applications/service-a/chart
