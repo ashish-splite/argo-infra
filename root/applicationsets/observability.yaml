@@ -9,7 +9,7 @@ spec:
   generators:
     - git:
         repoURL: https://github.com/ashish-splite/argo-infra.git
-        revision: HEAD
+        revision: main
         files:
           - path: "observability/*/app.yaml"
       selector:
@@ -30,7 +30,7 @@ spec:
             valueFiles:
               - $values/{{ .valuesPath }}
         - repoURL: https://github.com/ashish-splite/argo-infra.git
-          targetRevision: HEAD
+          targetRevision: main
           ref: values
       destination:
         server: https://kubernetes.default.svc

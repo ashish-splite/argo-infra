@@ -9,7 +9,7 @@ spec:
   generators:
     - git:
         repoURL: https://github.com/ashish-splite/argo-infra.git
-        revision: HEAD
+        revision: main
         files:
           - path: "services/*/app.yaml"
       selector:
@@ -24,7 +24,7 @@ spec:
       project: default
       source:
         repoURL: https://github.com/ashish-splite/argo-infra.git
-        targetRevision: HEAD
+        targetRevision: main
         path: "{{ .path }}"
         helm:
           releaseName: "{{ .name }}"
