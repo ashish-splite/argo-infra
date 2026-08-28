@@ -12,12 +12,11 @@ spec:
         revision: HEAD
         files:
           - path: "platform-manifests/*/app.yaml"
-  selector:
-    matchExpressions:
-      - key: enabled
-        operator: In
-        values:
-          - "true"
+      selector:
+        matchExpressions:
+          - key: enabled
+            operator: NotIn
+            values: ["false"]
   template:
     metadata:
       name: "{{ .name }}"
