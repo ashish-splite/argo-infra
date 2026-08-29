@@ -6,6 +6,6 @@ sourceType: external-helm
 chart:
   repoURL: https://charts.bitnami.com/bitnami
   name: postgresql
-  version: "15.5.20"
+  version: "16.4.1"
 
 valuesPath: datastores/postgres-pod/values.yaml
