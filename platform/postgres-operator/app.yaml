@@ -7,5 +7,3 @@ chart:
   repoURL: https://cloudnative-pg.github.io/charts
   name: cloudnative-pg
   version: "0.27.0"
-
-valuesPath: platform/postgres-operator/values.yaml

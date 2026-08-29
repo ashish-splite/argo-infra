@@ -1,4 +1,10 @@
 enabled: true
 name: postgres-cluster
 namespace: datastores
-sourceType: git
+sourceType: external-helm
+extraManifests: true
+
+chart:
+  repoURL: https://cloudnative-pg.github.io/charts
+  name: cluster
+  version: "0.4.0"

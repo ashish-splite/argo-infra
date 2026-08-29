@@ -7,5 +7,3 @@ chart:
   repoURL: https://charts.bitnami.com/bitnami
   name: redis
   version: "19.6.4"
-
-valuesPath: datastores/redis/values.yaml

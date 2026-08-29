@@ -42,6 +42,7 @@ spec:
 
   templatePatch: |
     {{- if eq .sourceType "external-helm" }}
+    {{- if index . "extraManifests" }}
     spec:
       sources:
         - repoURL: "{{ .chart.repoURL }}"
@@ -50,11 +51,31 @@ spec:
           helm:
             skipCrds: false
             valueFiles:
-              - "$values/{{ .valuesPath }}"
+              - "$values/{{ .path.path }}/values.yaml"
 
         - repoURL: "https://github.com/ashish-splite/argo-infra.git"
           targetRevision: main
           ref: values
+
+        - repoURL: "https://github.com/ashish-splite/argo-infra.git"
+          targetRevision: main
+          path: "{{ .path.path }}/chart"
+
+    {{- else }}
+    spec:
+      sources:
+        - repoURL: "{{ .chart.repoURL }}"
+          chart: "{{ .chart.name }}"
+          targetRevision: "{{ .chart.version }}"
+          helm:
+            skipCrds: false
+            valueFiles:
+              - "$values/{{ .path.path }}/values.yaml"
+
+        - repoURL: "https://github.com/ashish-splite/argo-infra.git"
+          targetRevision: main
+          ref: values
+    {{- end }}
 
     {{- else if eq .sourceType "git" }}
     spec:
