@@ -1,0 +1,22 @@
+# PostgreSQL Cluster configuration
+
+# Number of instances (1 primary + N-1 replicas)
+instances: 1
+
+# Storage configuration
+storage:
+  size: 1Gi
+  storageClass: standard
+
+# Bootstrap configuration
+bootstrap:
+  database: app
+  owner: app
+
+# PostgreSQL parameters
+postgresql:
+  parameters:
+    max_connections: "100"
+    shared_buffers: "128MB"
+    effective_cache_size: "256MB"
+    work_mem: "4MB"

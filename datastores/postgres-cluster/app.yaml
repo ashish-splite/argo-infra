@@ -1,0 +1,4 @@
+enabled: true
+name: postgres-cluster
+namespace: datastores
+sourceType: git
