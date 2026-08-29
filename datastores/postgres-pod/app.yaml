@@ -1,5 +1,5 @@
-enabled: false
-name: postgres
+enabled: true
+name: postgres-pod
 namespace: datastores
 sourceType: external-helm
 

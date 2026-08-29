@@ -12,7 +12,7 @@ auth:
 # PostgreSQL service
 # ------------------------------------------------------------
 service:
-  type: ClusterIP
+  type: LoadBalancer
   ports:
     postgresql: 5432
 
