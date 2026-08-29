@@ -3,6 +3,10 @@
 # Operator namespace
 namespaceOverride: cnpg-system
 
+# Install CRDs with the operator
+crds:
+  create: true
+
 # Single operator replica is sufficient for local Minikube
 replicaCount: 1
 
