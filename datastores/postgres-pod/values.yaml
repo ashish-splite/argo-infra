@@ -1,4 +1,12 @@
-# datastores/postgres/values.yaml
+# datastores/postgres-pod/values.yaml
+
+# ------------------------------------------------------------
+# Image - pinned to stable tag
+# ------------------------------------------------------------
+image:
+  registry: docker.io
+  repository: bitnami/postgresql
+  tag: "17"
 
 # ------------------------------------------------------------
 # Authentication
