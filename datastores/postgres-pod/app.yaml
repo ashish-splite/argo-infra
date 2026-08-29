@@ -8,4 +8,4 @@ chart:
   name: postgresql
   version: "15.5.20"
 
-valuesPath: datastores/postgres/values.yaml
+valuesPath: datastores/postgres-pod/values.yaml
