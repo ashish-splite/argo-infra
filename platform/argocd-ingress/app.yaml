@@ -1,0 +1,5 @@
+enabled: true
+name: argocd-ingress
+namespace: argocd
+sourceType: git
+path: platform/argocd-ingress

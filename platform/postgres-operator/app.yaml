@@ -1,0 +1,11 @@
+enabled: true
+name: postgres-operator
+namespace: cnpg-system
+sourceType: external-helm
+
+chart:
+  repoURL: https://cloudnative-pg.github.io/charts
+  name: cloudnative-pg
+  version: "0.27.0"
+
+valuesPath: platform/postgres-operator/values.yaml

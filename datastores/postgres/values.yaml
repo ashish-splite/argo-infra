@@ -1,6 +1,58 @@
+# datastores/postgres/values.yaml
+
+# ------------------------------------------------------------
+# Authentication
+# ------------------------------------------------------------
 auth:
-  postgresPassword: postgres
+  username: app
+  password: "change-me"
   database: appdb
+
+# ------------------------------------------------------------
+# PostgreSQL service
+# ------------------------------------------------------------
+service:
+  type: ClusterIP
+  ports:
+    postgresql: 5432
+
+# ------------------------------------------------------------
+# Persistence
+# ------------------------------------------------------------
 primary:
   persistence:
-    enabled: false
+    enabled: true
+    storageClass: standard
+    accessModes:
+      - ReadWriteOnce
+    size: 5Gi
+
+# ------------------------------------------------------------
+# Resources
+# ------------------------------------------------------------
+primary:
+  resources:
+    requests:
+      cpu: 250m
+      memory: 256Mi
+    limits:
+      cpu: 1
+      memory: 1Gi
+
+# ------------------------------------------------------------
+# PostgreSQL configuration
+# ------------------------------------------------------------
+primary:
+  extendedConfiguration: |
+    max_connections = 100
+    shared_buffers = 128MB
+
+# ------------------------------------------------------------
+# Pod security / local environment
+# ------------------------------------------------------------
+primary:
+  podSecurityContext:
+    enabled: true
+
+  containerSecurityContext:
+    enabled: true
