@@ -17,17 +17,16 @@ auth:
   database: appdb
 
 # ------------------------------------------------------------
-# PostgreSQL service
-# ------------------------------------------------------------
-service:
-  type: LoadBalancer
-  ports:
-    postgresql: 5432
-
-# ------------------------------------------------------------
-# Persistence
+# Primary configuration (all primary settings consolidated)
 # ------------------------------------------------------------
 primary:
+  # Service - use different port to avoid conflict with postgres-cluster
+  service:
+    type: LoadBalancer
+    ports:
+      postgresql: 15432
+
+  # Persistence
   persistence:
     enabled: true
     storageClass: standard
@@ -35,10 +34,7 @@ primary:
       - ReadWriteOnce
     size: 5Gi
 
-# ------------------------------------------------------------
-# Resources
-# ------------------------------------------------------------
-primary:
+  # Resources
   resources:
     requests:
       cpu: 250m
@@ -47,18 +43,12 @@ primary:
       cpu: 1
       memory: 1Gi
 
-# ------------------------------------------------------------
-# PostgreSQL configuration
-# ------------------------------------------------------------
-primary:
+  # PostgreSQL configuration
   extendedConfiguration: |
     max_connections = 100
     shared_buffers = 128MB
 
-# ------------------------------------------------------------
-# Pod security / local environment
-# ------------------------------------------------------------
-primary:
+  # Pod security
   podSecurityContext:
     enabled: true
 
