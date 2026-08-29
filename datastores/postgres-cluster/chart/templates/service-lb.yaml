@@ -6,9 +6,9 @@ metadata:
   labels:
     cnpg.io/cluster: {{ .Release.Name }}
 spec:
-  type: LoadBalancer
+  type: {{ .Values.service.type }}
   ports:
-    - port: 5432
+    - port: {{ .Values.service.port }}
       targetPort: 5432
       protocol: TCP
       name: postgres

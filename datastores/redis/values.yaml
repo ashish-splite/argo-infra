@@ -4,3 +4,7 @@ auth:
 master:
   persistence:
     enabled: false
+  service:
+    type: LoadBalancer
+    ports:
+      redis: 6379

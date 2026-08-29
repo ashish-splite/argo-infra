@@ -1,4 +1,4 @@
-# datastores/postgres-pod/values.yaml
+# datastores/postgres/values.yaml
 
 # ------------------------------------------------------------
 # Image - pinned to stable tag
@@ -24,7 +24,7 @@ primary:
   service:
     type: LoadBalancer
     ports:
-      postgresql: 15432
+      postgresql: 5432
 
   # Persistence
   persistence:

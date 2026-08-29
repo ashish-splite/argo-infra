@@ -1,2 +1,6 @@
 # Extra resources values
-# LoadBalancer service uses Release.Name to match the cluster
+# LoadBalancer service configuration
+
+service:
+  type: LoadBalancer
+  port: 15432
