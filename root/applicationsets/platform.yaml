@@ -48,6 +48,7 @@ spec:
           chart: "{{ .chart.name }}"
           targetRevision: "{{ .chart.version }}"
           helm:
+            skipCrds: false
             valueFiles:
               - "$values/{{ .valuesPath }}"
 
