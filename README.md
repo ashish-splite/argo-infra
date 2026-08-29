@@ -9,14 +9,14 @@ ApplicationSet-based GitOps setup for local Kubernetes learning with Argo CD.
 ├── root/
 │   ├── root-app.yaml                    # Bootstrap application
 │   └── applicationsets/
-│       ├── services.yaml                # Local Helm charts (services/*)
+│       ├── applications.yaml                # Local Helm charts (applications/*)
 │       ├── datastores.yaml              # External Helm charts (redis, postgres)
 │       ├── observability.yaml           # Monitoring stack (prometheus)
 │       ├── ci-cd.yaml                   # CI/CD tools (jenkins)
 │       ├── platform-helm.yaml           # Platform Helm charts (ingress-nginx)
 │       └── platform-manifests.yaml      # Platform manifests (argocd-ingress)
 │
-├── services/                            # Application services (local Helm charts)
+├── applications/                            # Application applications (local Helm charts)
 │   ├── chat-app/
 │   │   ├── app.yaml                     # App config: name, namespace, path, enabled
 │   │   └── chart/                       # Helm chart
@@ -71,7 +71,7 @@ name: my-app                     # Argo CD application name
 namespace: my-namespace          # Target namespace
 
 # For local charts:
-path: services/my-app/chart      # Path to Helm chart
+path: applications/my-app/chart      # Path to Helm chart
 
 # For external charts:
 valuesPath: datastores/redis/values.yaml
@@ -114,7 +114,7 @@ kubectl get ns apps datastores observability ci-cd ingress-nginx
 
 | Category | Folder | Description |
 |----------|--------|-------------|
-| services | `services/` | Application microservices (local Helm charts) |
+| applications | `applications/` | Application microapplications (local Helm charts) |
 | datastores | `datastores/` | Databases - Redis, PostgreSQL |
 | observability | `observability/` | Monitoring - Prometheus stack |
 | ci-cd | `ci-cd/` | CI/CD tools - Jenkins |

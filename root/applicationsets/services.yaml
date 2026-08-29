@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
-  name: services
+  name: applications
   namespace: argocd
 
 spec:
@@ -14,7 +14,7 @@ spec:
         repoURL: https://github.com/ashish-splite/argo-infra.git
         revision: main
         files:
-          - path: "services/*/app.yaml"
+          - path: "applications/*/app.yaml"
       selector:
         matchExpressions:
           - key: enabled
