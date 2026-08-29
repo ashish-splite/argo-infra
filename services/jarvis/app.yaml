@@ -1,3 +1,4 @@
 enabled: true
 name: jarvis
 namespace: apps
+sourceType: git

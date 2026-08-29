@@ -1,8 +1,11 @@
 enabled: false
 name: prometheus
 namespace: observability
-valuesPath: observability/prometheus/values.yaml
+sourceType: external-helm
+
 chart:
   repoURL: https://prometheus-community.github.io/helm-charts
   name: kube-prometheus-stack
   version: 69.8.2
+
+valuesPath: observability/prometheus/values.yaml

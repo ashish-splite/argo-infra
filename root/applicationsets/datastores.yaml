@@ -3,9 +3,12 @@ kind: ApplicationSet
 metadata:
   name: datastores
   namespace: argocd
+
 spec:
   goTemplate: true
-  goTemplateOptions: ["missingkey=error"]
+  goTemplateOptions:
+    - missingkey=error
+
   generators:
     - git:
         repoURL: https://github.com/ashish-splite/argo-infra.git
@@ -17,27 +20,46 @@ spec:
           - key: enabled
             operator: NotIn
             values: ["false"]
+
   template:
     metadata:
       name: "{{ .name }}"
+
     spec:
       project: default
-      sources:
-        - repoURL: "{{ .chart.repoURL }}"
-          chart: "{{ .chart.name }}"
-          targetRevision: "{{ .chart.version }}"
-          helm:
-            valueFiles:
-              - $values/{{ .valuesPath }}
-        - repoURL: https://github.com/ashish-splite/argo-infra.git
-          targetRevision: main
-          ref: values
+
       destination:
         server: https://kubernetes.default.svc
         namespace: "{{ .namespace }}"
+
       syncPolicy:
         automated:
           prune: true
           selfHeal: true
         syncOptions:
           - CreateNamespace=true
+          - ServerSideApply=true
+
+  templatePatch: |
+    {{- if eq .sourceType "external-helm" }}
+    spec:
+      sources:
+        - repoURL: "{{ .chart.repoURL }}"
+          chart: "{{ .chart.name }}"
+          targetRevision: "{{ .chart.version }}"
+          helm:
+            skipCrds: false
+            valueFiles:
+              - "$values/{{ .valuesPath }}"
+
+        - repoURL: "https://github.com/ashish-splite/argo-infra.git"
+          targetRevision: main
+          ref: values
+
+    {{- else if eq .sourceType "git" }}
+    spec:
+      source:
+        repoURL: "https://github.com/ashish-splite/argo-infra.git"
+        targetRevision: main
+        path: "{{ .path.path }}/chart"
+    {{- end }}

@@ -1,3 +1,4 @@
 enabled: true
 name: chat-app
 namespace: apps
+sourceType: git

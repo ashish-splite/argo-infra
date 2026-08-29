@@ -1,8 +1,11 @@
 enabled: false
 name: redis
 namespace: datastores
-valuesPath: datastores/redis/values.yaml
+sourceType: external-helm
+
 chart:
   repoURL: https://charts.bitnami.com/bitnami
   name: redis
   version: "19.6.4"
+
+valuesPath: datastores/redis/values.yaml

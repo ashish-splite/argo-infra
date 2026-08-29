@@ -1,8 +1,11 @@
 enabled: false
 name: jenkins
 namespace: ci-cd
-valuesPath: ci-cd/jenkins/values.yaml
+sourceType: external-helm
+
 chart:
   repoURL: https://charts.jenkins.io
   name: jenkins
   version: 5.8.66
+
+valuesPath: ci-cd/jenkins/values.yaml
