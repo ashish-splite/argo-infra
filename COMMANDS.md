@@ -1,3 +1,3 @@
 minikube start
-minikube tunnel
+sudo minikube tunnel
 ngrok http 80
