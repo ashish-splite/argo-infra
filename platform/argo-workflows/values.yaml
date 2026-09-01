@@ -1,0 +1,29 @@
+# Argo Workflows - Workflow orchestration for Kubernetes
+# https://argo-workflows.readthedocs.io/
+
+controller:
+  replicas: 1
+
+server:
+  replicas: 1
+  # Access mode: server, client, or sso
+  authMode: server
+  
+  # Ingress configuration
+  ingress:
+    enabled: true
+    ingressClassName: nginx
+    hosts:
+      - argo-workflows.local
+
+# Workflow defaults
+workflow:
+  serviceAccount:
+    create: true
+    name: argo-workflow
+
+# Artifact storage (optional - for workflow outputs)
+# artifactRepository:
+#   s3:
+#     bucket: my-bucket
+#     endpoint: s3.amazonaws.com

@@ -1,0 +1,48 @@
+# ArgoCD - GitOps Continuous Delivery
+# https://argo-cd.readthedocs.io/
+
+# Server configuration
+server:
+  replicas: 1
+  
+  # Ingress for UI access
+  ingress:
+    enabled: true
+    ingressClassName: nginx
+    hostname: argocd.local
+    # TLS disabled for local dev
+    tls: false
+    # For HTTPS termination at ingress
+    annotations:
+      nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+      nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+
+# Controller configuration
+controller:
+  replicas: 1
+
+# Repo server
+repoServer:
+  replicas: 1
+
+# ApplicationSet controller
+applicationSet:
+  replicas: 1
+
+# Redis (used for caching)
+redis:
+  enabled: true
+
+# Disable HA for local dev (single instance)
+redis-ha:
+  enabled: false
+
+# Notifications controller
+notifications:
+  enabled: true
+
+# Configs
+configs:
+  params:
+    # Allow insecure connections (for local dev without TLS)
+    server.insecure: true

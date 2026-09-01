@@ -1,4 +1,4 @@
-enabled: true
+enabled: false
 name: redis
 namespace: datastores
 sourceType: external-helm

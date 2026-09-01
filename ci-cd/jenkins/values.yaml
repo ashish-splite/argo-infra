@@ -27,11 +27,7 @@ controller:
   ingress:
     enabled: true
     ingressClassName: nginx
-    path: /jenkins
-    pathType: ImplementationSpecific
-    annotations:
-      nginx.ingress.kubernetes.io/rewrite-target: /$2
-      nginx.ingress.kubernetes.io/use-regex: "true"
+    hostName: jenkins.local
 
 persistence:
   enabled: true

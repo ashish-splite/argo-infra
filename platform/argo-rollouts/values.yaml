@@ -1,0 +1,18 @@
+# Argo Rollouts - Progressive Delivery (Canary, Blue-Green)
+# https://argo-rollouts.readthedocs.io/
+
+controller:
+  replicas: 1
+
+# Dashboard for visualizing rollouts
+dashboard:
+  enabled: true
+  replicas: 1
+  ingress:
+    enabled: true
+    ingressClassName: nginx
+    hosts:
+      - argo-rollouts.local
+
+# Install kubectl plugin for CLI access
+# kubectl argo rollouts get rollout <name>

@@ -1,0 +1,17 @@
+# KEDA - Kubernetes Event-driven Autoscaling
+# https://keda.sh/docs/
+
+# Operator settings
+operator:
+  replicaCount: 1
+
+# Metrics server settings  
+metricsServer:
+  replicaCount: 1
+
+# Prometheus monitoring
+prometheus:
+  metricServer:
+    enabled: false
+  operator:
+    enabled: false

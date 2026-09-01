@@ -1,4 +1,4 @@
-enabled: true
+enabled: false
 name: postgres-cluster
 namespace: datastores
 sourceType: external-helm

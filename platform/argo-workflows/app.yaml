@@ -1,0 +1,9 @@
+enabled: true
+name: argo-workflows
+namespace: argo-workflows
+sourceType: external-helm
+
+chart:
+  repoURL: https://argoproj.github.io/argo-helm
+  name: argo-workflows
+  version: "0.45.6"

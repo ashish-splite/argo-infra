@@ -1,0 +1,9 @@
+enabled: true
+name: argo-rollouts
+namespace: argo-rollouts
+sourceType: external-helm
+
+chart:
+  repoURL: https://argoproj.github.io/argo-helm
+  name: argo-rollouts
+  version: "2.39.1"

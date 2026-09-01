@@ -1,0 +1,9 @@
+enabled: true
+name: keda
+namespace: keda
+sourceType: external-helm
+
+chart:
+  repoURL: https://kedacore.github.io/charts
+  name: keda
+  version: "2.16.1"

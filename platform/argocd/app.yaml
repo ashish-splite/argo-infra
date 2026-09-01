@@ -1,0 +1,9 @@
+enabled: true
+name: argocd
+namespace: argocd
+sourceType: external-helm
+
+chart:
+  repoURL: https://argoproj.github.io/argo-helm
+  name: argo-cd
+  version: "7.8.26"
