@@ -1,0 +1,12 @@
+clusterSecretStore:
+  name: localstack-secrets-manager
+  syncWave: "1"
+  provider:
+    service: SecretsManager
+    region: us-east-1
+    endpoint: http://localstack.localstack.svc.cluster.local:4566
+  credentials:
+    secretName: localstack-aws-credentials
+    syncWave: "0"
+    accessKeyID: test
+    secretAccessKey: test

@@ -1,0 +1,9 @@
+enabled: true
+name: localstack
+namespace: localstack
+sourceType: external-helm
+
+chart:
+  repoURL: https://localstack.github.io/helm-charts
+  name: localstack
+  version: "0.7.0"

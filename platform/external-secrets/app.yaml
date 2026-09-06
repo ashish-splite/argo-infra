@@ -1,0 +1,10 @@
+enabled: true
+name: external-secrets
+namespace: external-secrets
+sourceType: external-helm
+extraManifests: true
+
+chart:
+  repoURL: https://charts.external-secrets.io
+  name: external-secrets
+  version: "0.19.1"

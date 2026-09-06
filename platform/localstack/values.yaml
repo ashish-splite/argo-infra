@@ -1,0 +1,34 @@
+# Run the AWS APIs needed for local External Secrets development.
+startServices: secretsmanager
+
+image:
+  repository: localstack/localstack
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+
+# Keep created secrets across pod restarts.
+extraEnvVars:
+  - name: PERSISTENCE
+    value: "1"
+
+persistence:
+  enabled: true
+  accessModes:
+    - ReadWriteOnce
+  size: 8Gi
+
+# The persistent volume cannot be mounted by two pods during a rolling update.
+updateStrategy:
+  type: Recreate
+
+ingress:
+  enabled: true
+  ingressClassName: nginx
+  hosts:
+    - host: localstack.local
+      paths:
+        - path: /
+          pathType: Prefix

@@ -1,0 +1,5 @@
+apiVersion: v2
+name: external-secrets-extras
+description: External Secrets stores for local AWS Secrets Manager emulation
+version: 1.0.0
+appVersion: "1.0"
