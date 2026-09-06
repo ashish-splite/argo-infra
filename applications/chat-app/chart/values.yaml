@@ -20,10 +20,8 @@ resources:
 env:
   NODE_ENV: production
   LOG_LEVEL: info
-  API_BASE_URL: http://localhost:80/jarvis  # Update this to the correct URL for your backend service
 
 ingress:
   enabled: true
   className: nginx
-  paths:
-    - path: /chat-app
+  host: chat-app.local

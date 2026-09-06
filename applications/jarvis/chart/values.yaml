@@ -24,5 +24,4 @@ env:
 ingress:
   enabled: true
   className: nginx
-  paths:
-    - path: /jarvis
+  host: jarvis.local
