@@ -43,3 +43,8 @@ configs:
   params:
     # Allow insecure connections (for local dev without TLS)
     server.insecure: true
+
+  secret:
+    # Local-dev only: bcrypt hash of "admin". Bump mtime to force a credential refresh.
+    argocdServerAdminPassword: "$2a$10$w/hun2qt1k9LW2GxDB8tkuRMgps1m1KPgFgQaq19.1NQbW8i6Qi2u"
+    argocdServerAdminPasswordMtime: "2026-09-06T23:56:46Z"
