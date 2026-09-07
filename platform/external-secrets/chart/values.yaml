@@ -1,4 +1,4 @@
-# The token Secret is created out-of-band after `vault operator init`; it is not stored in Git.
+# Vault runs in dev mode, so the root token is a known constant rather than a real credential.
 clusterSecretStore:
   name: vault-backend
   syncWave: "1"
@@ -9,3 +9,5 @@ clusterSecretStore:
   credentials:
     secretName: vault-token
     key: token
+    syncWave: "0"
+    token: root

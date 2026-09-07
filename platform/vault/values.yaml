@@ -3,14 +3,16 @@ injector:
   enabled: false
 
 server:
-  standalone:
+  # Dev mode: auto-unsealed with a known root token, but state is in-memory and lost on restart.
+  dev:
     enabled: true
+    devRootToken: "root"
 
-  # File storage on a PVC; survives pod restarts but requires manual unseal.
+  standalone:
+    enabled: false
+
   dataStorage:
-    enabled: true
-    size: 2Gi
-    accessMode: ReadWriteOnce
+    enabled: false
 
   ingress:
     enabled: true
