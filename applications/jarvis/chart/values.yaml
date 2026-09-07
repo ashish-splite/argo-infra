@@ -17,6 +17,13 @@ resources:
     cpu: 500m
     memory: 512Mi
 
+externalSecret:
+  enabled: true
+  refreshInterval: 1h
+  secretStoreName: vault-backend
+  remoteKey: jarvis/app
+  targetSecretName: jarvis-env
+
 env:
   NODE_ENV: production
   LOG_LEVEL: info
