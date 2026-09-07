@@ -1,15 +1,16 @@
 # Run the AWS APIs needed for local External Secrets development.
 startServices: secretsmanager
 
+# 4.5.0 is the last line that runs without a LOCALSTACK_AUTH_TOKEN; 2026.x requires a licensed token.
 image:
   repository: localstack/localstack
-  tag: "2026.8.1"
-  pullPolicy: IfNotPresent
+  tag: "4.5.0"
+  pullPolicy: Always
 
 service:
   type: ClusterIP
 
-# Persistence is a licensed LocalStack feature; the community image exits on startup if PERSISTENCE=1.
+# Persistence requires a paid LocalStack plan, so state resets on pod restart.
 persistence:
   enabled: false
 
