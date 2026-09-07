@@ -1,4 +1,4 @@
-enabled: true
+enabled: false
 name: postgres-operator
 namespace: cnpg-system
 sourceType: external-helm
