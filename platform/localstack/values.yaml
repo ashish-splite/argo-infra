@@ -3,18 +3,15 @@ startServices: secretsmanager
 
 image:
   repository: localstack/localstack
-  tag: latest
+  tag: "2026.8.1"
   pullPolicy: IfNotPresent
 
 service:
   type: ClusterIP
 
-# Keep created secrets across pod restarts; the chart sets PERSISTENCE=1 from this.
+# Persistence is a licensed LocalStack feature; the community image exits on startup if PERSISTENCE=1.
 persistence:
-  enabled: true
-  accessModes:
-    - ReadWriteOnce
-  size: 8Gi
+  enabled: false
 
 # The persistent volume cannot be mounted by two pods during a rolling update.
 updateStrategy:
@@ -28,3 +25,11 @@ ingress:
       paths:
         - path: /
           pathType: Prefix
+
+resources:
+  requests:
+    cpu: 250m
+    memory: 512Mi
+  limits:
+    cpu: "1"
+    memory: 1Gi
