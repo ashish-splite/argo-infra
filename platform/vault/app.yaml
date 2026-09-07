@@ -1,0 +1,9 @@
+enabled: true
+name: vault
+namespace: vault
+sourceType: external-helm
+
+chart:
+  repoURL: https://helm.releases.hashicorp.com
+  name: vault
+  version: "0.34.1"

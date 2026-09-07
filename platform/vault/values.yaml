@@ -1,0 +1,31 @@
+# Sidecar injection is unused; External Secrets pulls from Vault instead.
+injector:
+  enabled: false
+
+server:
+  standalone:
+    enabled: true
+
+  # File storage on a PVC; survives pod restarts but requires manual unseal.
+  dataStorage:
+    enabled: true
+    size: 2Gi
+    accessMode: ReadWriteOnce
+
+  ingress:
+    enabled: true
+    ingressClassName: nginx
+    hosts:
+      - host: vault.local
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+ui:
+  enabled: true
+  serviceType: ClusterIP

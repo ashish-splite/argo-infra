@@ -1,12 +1,11 @@
+# The token Secret is created out-of-band after `vault operator init`; it is not stored in Git.
 clusterSecretStore:
-  name: localstack-secrets-manager
+  name: vault-backend
   syncWave: "1"
   provider:
-    service: SecretsManager
-    region: us-east-1
-    endpoint: http://localstack.localstack.svc.cluster.local:4566
+    server: http://vault.vault.svc.cluster.local:8200
+    path: secret
+    version: v2
   credentials:
-    secretName: localstack-aws-credentials
-    syncWave: "0"
-    accessKeyID: test
-    secretAccessKey: test
+    secretName: vault-token
+    key: token
