@@ -9,11 +9,7 @@ image:
 service:
   type: ClusterIP
 
-# Keep created secrets across pod restarts.
-extraEnvVars:
-  - name: PERSISTENCE
-    value: "1"
-
+# Keep created secrets across pod restarts; the chart sets PERSISTENCE=1 from this.
 persistence:
   enabled: true
   accessModes:
