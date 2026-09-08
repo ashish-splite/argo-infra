@@ -19,7 +19,7 @@ resources:
 
 externalSecret:
   enabled: true
-  refreshInterval: 1h
+  refreshInterval: 1m
   secretStoreName: vault-backend
   remoteKey: jarvis/app
   targetSecretName: jarvis-env
