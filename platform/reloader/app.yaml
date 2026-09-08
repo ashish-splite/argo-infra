@@ -1,0 +1,9 @@
+enabled: true
+name: reloader
+namespace: reloader
+sourceType: external-helm
+
+chart:
+  repoURL: https://stakater.github.io/stakater-charts
+  name: reloader
+  version: "2.2.16"

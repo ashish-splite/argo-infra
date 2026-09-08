@@ -1,0 +1,41 @@
+# Stakater Reloader - restarts workloads when watched ConfigMaps/Secrets change
+# https://github.com/stakater/Reloader
+
+reloader:
+  watchGlobally: true
+
+  # "annotations" writes reloader.stakater.com/last-reloaded-from on the pod
+  # template instead of injecting an env var, so Argo CD drift is limited to a
+  # single annotation that is excluded via ignoreDifferences.
+  reloadStrategy: annotations
+
+  # ESO recreates the target Secret on rotation; reload on create/delete too.
+  reloadOnCreate: true
+  reloadOnDelete: true
+
+  # Only opt-in workloads are reloaded (requires reloader.stakater.com/* annotations).
+  autoReloadAll: false
+
+  ignoreJobs: true
+  ignoreCronJobs: true
+
+  # Argo Rollouts is installed in this cluster; allow Reloader to manage them.
+  isArgoRollouts: true
+
+  rbac:
+    enabled: true
+
+  serviceAccount:
+    create: true
+
+  deployment:
+    replicas: 1
+    resources:
+      requests:
+        cpu: 10m
+        memory: 64Mi
+      limits:
+        cpu: 100m
+        memory: 128Mi
+
+  readOnlyRootFileSystem: true

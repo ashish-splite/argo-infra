@@ -32,6 +32,14 @@ spec:
         server: https://kubernetes.default.svc
         namespace: "{{ .namespace }}"
 
+      # Reloader stamps this annotation on the pod template when it restarts a
+      # workload; without this, selfHeal would immediately revert the restart.
+      ignoreDifferences:
+        - group: apps
+          kind: Deployment
+          jqPathExpressions:
+            - '.spec.template.metadata.annotations."reloader.stakater.com/last-reloaded-from"'
+
       syncPolicy:
         automated:
           prune: true

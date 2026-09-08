@@ -24,6 +24,10 @@ externalSecret:
   remoteKey: jarvis/app
   targetSecretName: jarvis-env
 
+# Stakater Reloader restarts the Deployment when the ESO-managed Secret changes.
+reloader:
+  enabled: true
+
 env:
   NODE_ENV: production
   LOG_LEVEL: info
