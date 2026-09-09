@@ -1,14 +1,11 @@
 replicaCount: 1
-
 image:
-  repository: thedarkest22/ai-agent  # Docker Hub
-  tag: "latest"
+  repository: thedarkest22/ai-agent # Docker Hub
+  tag: "f70acad"
   pullPolicy: Always
-
 service:
   type: ClusterIP
   port: 3000
-
 resources:
   requests:
     cpu: 100m
@@ -16,22 +13,18 @@ resources:
   limits:
     cpu: 500m
     memory: 512Mi
-
 externalSecret:
   enabled: true
   refreshInterval: 1m
   secretStoreName: vault-backend
   remoteKey: jarvis/app
   targetSecretName: jarvis-env
-
 # Stakater Reloader restarts the Deployment when the ESO-managed Secret changes.
 reloader:
   enabled: true
-
 env:
   NODE_ENV: production
   LOG_LEVEL: info
-
 ingress:
   enabled: true
   className: nginx
