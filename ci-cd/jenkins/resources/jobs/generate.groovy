@@ -1,3 +1,7 @@
+folder('applications') {
+    description('Application CI pipelines')
+}
+
 applications.each { app ->
 
     def appName = app.name
