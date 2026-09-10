@@ -1,0 +1,16 @@
+applications:
+
+  - name: jarvis
+
+    source:
+      repository: "https://github.com/ashish-splite/jarvis.git"
+      branch: "main"
+
+    image:
+      repository: "thedarkest22/jarvis"
+
+    gitops:
+      repository: "https://github.com/ashish-splite/argo-infra.git"
+      branch: "main"
+      valuesFile: "applications/jarvis/chart/values.yaml"
+      imageTagKey: ".image.tag"
