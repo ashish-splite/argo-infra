@@ -8,18 +8,7 @@ applications.each { app ->
 
     pipelineJob("applications/${appName}") {
 
-        description("""
-            CI pipeline for ${appName}.
-
-            Source:
-            ${app.source.repository}
-
-            Image:
-            ${app.image.repository}
-
-            GitOps values:
-            ${app.gitops.valuesFile}
-        """.stripIndent())
+        description("CI pipeline for ${appName}")
 
         definition {
             cps {
@@ -50,7 +39,7 @@ applications.each { app ->
                             }
 
                             if (!app) {
-                                error "Application '\${appName}' not found in application.yaml"
+                                error "Application '\${appName}' not found in applications.yaml"
                             }
 
                             echo "Loaded configuration for \${appName}"
