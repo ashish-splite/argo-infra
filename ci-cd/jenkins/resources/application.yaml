@@ -2,6 +2,10 @@ applications:
 
   - name: jarvis
 
+    pipeline:
+      template: docker-gitops
+      version: "v1"
+
     source:
       repository: "https://github.com/ashish-splite/jarvis.git"
       branch: "main"
