@@ -1,5 +1,5 @@
 def config = readYaml(
-    file: 'ci-cd/resources/jenkins/applications.yaml'
+    file: 'ci-cd/jenkins/resources/application.yaml'
 )
 
 config.applications.each { app ->
