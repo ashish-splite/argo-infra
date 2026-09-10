@@ -7,7 +7,7 @@ applications:
       version: "v1"
 
     source:
-      repository: "https://github.com/ashish-splite/jarvis.git"
+      repository: "https://github.com/ashish-splite/ai-agent-ts.git"
       branch: "main"
 
     image:
