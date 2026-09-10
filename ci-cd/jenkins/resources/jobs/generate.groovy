@@ -1,8 +1,4 @@
-def config = readYaml(
-    file: 'ci-cd/jenkins/resources/application.yaml'
-)
-
-config.applications.each { app ->
+applications.each { app ->
 
     def appName = app.name
 
@@ -23,7 +19,6 @@ config.applications.each { app ->
 
         definition {
             cps {
-
                 script("""
                     pipeline {
                         agent any
