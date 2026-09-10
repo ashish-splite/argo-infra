@@ -24,26 +24,42 @@ applications.each { app ->
         definition {
             cps {
                 script("""
-                    pipeline {
-                        agent any
+                    def appName = '${appName}'
 
-                        stages {
+                    node {
 
-                            stage('Checkout') {
-                                steps {
-                                    echo 'Building ${appName}'
-                                }
+                        stage('Checkout CI Configuration') {
+
+                            deleteDir()
+
+                            git(
+                                url: 'https://github.com/ashish-splite/argo-infra.git',
+                                branch: 'main',
+                                credentialsId: 'github-credentials'
+                            )
+                        }
+
+                        stage('Load Application Configuration') {
+
+                            def config = readYaml(
+                                file: 'ci-cd/jenkins/resources/application.yaml'
+                            )
+
+                            def app = config.applications.find {
+                                it.name == appName
                             }
 
-                            stage('Test Configuration') {
-                                steps {
-                                    echo 'Source repository: ${app.source.repository}'
-                                    echo 'Source branch: ${app.source.branch}'
-                                    echo 'Image repository: ${app.image.repository}'
-                                    echo 'GitOps repository: ${app.gitops.repository}'
-                                    echo 'Values file: ${app.gitops.valuesFile}'
-                                }
+                            if (!app) {
+                                error "Application '\${appName}' not found in application.yaml"
                             }
+
+                            echo "Loaded configuration for \${appName}"
+
+                            def pipeline = load(
+                                'ci-cd/jenkins/resources/pipelines/dockerGitOpsPipeline.groovy'
+                            )
+
+                            pipeline.call(app)
                         }
                     }
                 """)

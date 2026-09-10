@@ -1,9 +1,5 @@
 def call(Map config) {
 
-    // -------------------------------------------------------------------------
-    // Validate configuration
-    // -------------------------------------------------------------------------
-
     def appName = config.name
     def sourceRepo = config.source.repository
     def sourceBranch = config.source.branch ?: 'main'
@@ -35,177 +31,131 @@ def call(Map config) {
         error "gitops.valuesFile is required for ${appName}"
     }
 
-    // -------------------------------------------------------------------------
-    // Pipeline
-    // -------------------------------------------------------------------------
+    stage('Checkout App') {
 
-    pipeline {
+        echo "Building ${appName}"
+        echo "Source: ${sourceRepo}"
+        echo "Branch: ${sourceBranch}"
 
-        agent any
+        deleteDir()
 
-        environment {
-            APP_NAME = appName
+        git(
+            url: sourceRepo,
+            branch: sourceBranch,
+            credentialsId: 'github-credentials'
+        )
 
-            SOURCE_REPO = sourceRepo
-            SOURCE_BRANCH = sourceBranch
+        env.GIT_SHA = sh(
+            script: 'git rev-parse HEAD',
+            returnStdout: true
+        ).trim()
 
-            IMAGE_REPOSITORY = imageRepository
+        env.IMAGE = "${imageRepository}:${env.GIT_SHA}"
 
-            GITOPS_REPO = gitOpsRepo
-            GITOPS_BRANCH = gitOpsBranch
-            GITOPS_VALUES_FILE = valuesFile
-            GITOPS_IMAGE_TAG_KEY = imageTagKey
-        }
+        echo "Commit: ${env.GIT_SHA}"
+        echo "Image:  ${env.IMAGE}"
+    }
 
-        stages {
+    stage('Build & Push Image') {
 
-            // -----------------------------------------------------------------
-            // Checkout application source
-            // -----------------------------------------------------------------
+        withCredentials([
+            usernamePassword(
+                credentialsId: 'dockerhub-credentials',
+                usernameVariable: 'DOCKER_USER',
+                passwordVariable: 'DOCKER_PASS'
+            )
+        ]) {
 
-            stage('Checkout') {
-                steps {
-                    echo "Building ${APP_NAME}"
-                    echo "Source: ${SOURCE_REPO}"
-                    echo "Branch: ${SOURCE_BRANCH}"
+            sh '''
+                set -e
 
-                    git(
-                        url: SOURCE_REPO,
-                        branch: SOURCE_BRANCH,
-                        credentialsId: 'github-credentials'
-                    )
+                echo "$DOCKER_PASS" | docker login \
+                    --username "$DOCKER_USER" \
+                    --password-stdin
 
-                    script {
-                        env.GIT_SHA = sh(
-                            script: 'git rev-parse HEAD',
-                            returnStdout: true
-                        ).trim()
+                docker build \
+                    --tag "$IMAGE" \
+                    .
 
-                        env.IMAGE = "${IMAGE_REPOSITORY}:${GIT_SHA}"
+                docker push "$IMAGE"
 
-                        echo "Commit: ${GIT_SHA}"
-                        echo "Image:  ${IMAGE}"
-                    }
-                }
-            }
-
-            // -----------------------------------------------------------------
-            // Build and push Docker image
-            // -----------------------------------------------------------------
-
-            stage('Build & Push Image') {
-                steps {
-                    withCredentials([
-                        usernamePassword(
-                            credentialsId: 'dockerhub-credentials',
-                            usernameVariable: 'DOCKER_USER',
-                            passwordVariable: 'DOCKER_PASS'
-                        )
-                    ]) {
-                        sh '''
-                            set -e
-
-                            echo "$DOCKER_PASS" | docker login \
-                                --username "$DOCKER_USER" \
-                                --password-stdin
-
-                            docker build \
-                                --tag "$IMAGE" \
-                                .
-
-                            docker push "$IMAGE"
-
-                            docker logout
-                        '''
-                    }
-                }
-            }
-
-            // -----------------------------------------------------------------
-            // Update GitOps repository
-            // -----------------------------------------------------------------
-
-            stage('Update GitOps') {
-                steps {
-                    withCredentials([
-                        usernamePassword(
-                            credentialsId: 'github-credentials',
-                            usernameVariable: 'GIT_USER',
-                            passwordVariable: 'GIT_TOKEN'
-                        )
-                    ]) {
-
-                        sh '''
-                            set -e
-
-                            rm -rf gitops
-
-                            AUTH_URL=$(echo "$GITOPS_REPO" | \
-                                sed "s#https://#https://$GIT_USER:$GIT_TOKEN@#")
-
-                            git clone \
-                                --branch "$GITOPS_BRANCH" \
-                                "$AUTH_URL" \
-                                gitops
-
-                            cd gitops
-
-                            if [ ! -f "$GITOPS_VALUES_FILE" ]; then
-                                echo "ERROR: Values file not found:"
-                                echo "$GITOPS_VALUES_FILE"
-                                exit 1
-                            fi
-
-                            echo "Updating:"
-                            echo "  File: $GITOPS_VALUES_FILE"
-                            echo "  Key:  $GITOPS_IMAGE_TAG_KEY"
-                            echo "  Tag:  $GIT_SHA"
-
-                            docker run --rm \
-                                -v "$WORKSPACE/gitops:/workdir" \
-                                mikefarah/yq \
-                                eval -i \
-                                "${GITOPS_IMAGE_TAG_KEY} = \\"${GIT_SHA}\\"" \
-                                "/workdir/${GITOPS_VALUES_FILE}"
-
-                            git config user.email "jenkins-ci@thedarkest22.local"
-                            git config user.name "jenkins-ci"
-
-                            git add "$GITOPS_VALUES_FILE"
-
-                            if git diff --cached --quiet; then
-                                echo "No GitOps changes required"
-                            else
-                                git commit \
-                                    -m "chore(${APP_NAME}): bump image to ${GIT_SHA}"
-
-                                git push \
-                                    "$AUTH_URL" \
-                                    HEAD:"$GITOPS_BRANCH"
-                            fi
-                        '''
-                    }
-                }
-            }
-        }
-
-        post {
-            success {
-                echo """
-                CI completed successfully.
-
-                Application: ${APP_NAME}
-                Image:       ${IMAGE}
-                GitOps repo: ${GITOPS_REPO}
-                Values file: ${GITOPS_VALUES_FILE}
-
-                Argo CD will detect the GitOps change and sync the new image.
-                """
-            }
-
-            failure {
-                echo "Pipeline failed for ${APP_NAME}"
-            }
+                docker logout
+            '''
         }
     }
+
+    stage('Update GitOps') {
+
+        withCredentials([
+            usernamePassword(
+                credentialsId: 'github-credentials',
+                usernameVariable: 'GIT_USER',
+                passwordVariable: 'GIT_TOKEN'
+            )
+        ]) {
+
+            sh '''
+                set -e
+
+                rm -rf gitops
+
+                AUTH_URL=$(echo "$GITOPS_REPO" | \
+                    sed "s#https://#https://$GIT_USER:$GIT_TOKEN@#")
+
+                git clone \
+                    --branch "$GITOPS_BRANCH" \
+                    "$AUTH_URL" \
+                    gitops
+
+                cd gitops
+
+                if [ ! -f "$GITOPS_VALUES_FILE" ]; then
+                    echo "ERROR: Values file not found:"
+                    echo "$GITOPS_VALUES_FILE"
+                    exit 1
+                fi
+
+                echo "Updating:"
+                echo "  File: $GITOPS_VALUES_FILE"
+                echo "  Key:  $GITOPS_IMAGE_TAG_KEY"
+                echo "  Tag:  $GIT_SHA"
+
+                docker run --rm \
+                    -v "$WORKSPACE/gitops:/workdir" \
+                    mikefarah/yq \
+                    eval -i \
+                    "${GITOPS_IMAGE_TAG_KEY} = \\"${GIT_SHA}\\"" \
+                    "/workdir/${GITOPS_VALUES_FILE}"
+
+                git config user.email "jenkins-ci@thedarkest22.local"
+                git config user.name "jenkins-ci"
+
+                git add "$GITOPS_VALUES_FILE"
+
+                if git diff --cached --quiet; then
+                    echo "No GitOps changes required"
+                else
+                    git commit \
+                        -m "chore(${APP_NAME}): bump image to ${GIT_SHA}"
+
+                    git push \
+                        "$AUTH_URL" \
+                        HEAD:"$GITOPS_BRANCH"
+                fi
+            '''
+        }
+    }
+
+    echo """
+    CI completed successfully.
+
+    Application: ${appName}
+    Image:       ${env.IMAGE}
+    GitOps repo: ${gitOpsRepo}
+    Values file: ${valuesFile}
+
+    Argo CD will detect the GitOps change and sync the new image.
+    """
 }
+
+return this
