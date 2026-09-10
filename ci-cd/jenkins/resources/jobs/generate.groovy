@@ -42,7 +42,7 @@ applications.each { app ->
                         stage('Load Application Configuration') {
 
                             def config = readYaml(
-                                file: 'ci-cd/jenkins/resources/application.yaml'
+                                file: 'ci-cd/jenkins/resources/applications.yaml'
                             )
 
                             def app = config.applications.find {
