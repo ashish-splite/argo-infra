@@ -1,7 +1,7 @@
 replicaCount: 1
 image:
   repository: thedarkest22/ai-agent # Docker Hub
-  tag: "f70acad"
+  tag: "1c82929"
   pullPolicy: Always
 service:
   type: ClusterIP
