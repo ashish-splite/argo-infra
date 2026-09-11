@@ -28,12 +28,14 @@ def call(Map args = [:]) {
                 env.GITOPS_BRANCH = app.gitops.branch ?: 'main'
                 env.GITOPS_VALUES_FILE = app.gitops.valuesFile
                 env.GITOPS_IMAGE_TAG_KEY = app.gitops.imageTagKey ?: '.image.tag'
+                env.GITOPS_IMAGE_REPO_KEY = app.gitops.imageRepoKey ?: '.image.repository'
 
                 echo """
                     application : ${env.APP_NAME}
                     image repo  : ${env.IMAGE_REPO}
                     gitops repo : ${env.GITOPS_REPO}
                     values file : ${env.GITOPS_VALUES_FILE}
+                    repo key    : ${env.GITOPS_IMAGE_REPO_KEY}
                     tag key     : ${env.GITOPS_IMAGE_TAG_KEY}
                 """.stripIndent()
             }
@@ -125,13 +127,14 @@ ASKPASS
                             exit 1
                         fi
 
-                        # strenv() sidesteps all shell/yq quoting of the tag value.
+                        # strenv() sidesteps all shell/yq quoting of the values.
                         docker run --rm \
+                            -e NEW_REPO="$IMAGE_REPO" \
                             -e NEW_TAG="$GIT_SHA" \
                             -v "$WORKSPACE/gitops:/workdir" \
                             mikefarah/yq \
                             eval -i \
-                            "$GITOPS_IMAGE_TAG_KEY = strenv(NEW_TAG)" \
+                            "$GITOPS_IMAGE_REPO_KEY = strenv(NEW_REPO) | $GITOPS_IMAGE_TAG_KEY = strenv(NEW_TAG)" \
                             "/workdir/$GITOPS_VALUES_FILE"
 
                         git config user.email "jenkins-ci@local"

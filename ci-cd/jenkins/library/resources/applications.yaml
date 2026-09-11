@@ -13,4 +13,5 @@ applications:
       repository: "https://github.com/ashish-splite/argo-infra.git"
       branch: "main"
       valuesFile: "applications/jarvis/chart/values.yaml"
+      imageRepoKey: ".image.repository"
       imageTagKey: ".image.tag"
