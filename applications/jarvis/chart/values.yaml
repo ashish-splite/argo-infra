@@ -1,6 +1,6 @@
 replicaCount: 1
 image:
-  repository: thedarkest22/ai-agent # Docker Hub
+  repository: thedarkest22/jarvis # Docker Hub
   tag: "1c82929"
   pullPolicy: Always
 service:
