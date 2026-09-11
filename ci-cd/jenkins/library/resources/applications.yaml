@@ -2,10 +2,6 @@ applications:
 
   - name: jarvis
 
-    pipeline:
-      template: docker-gitops
-      version: "v1"
-
     source:
       repository: "https://github.com/ashish-splite/ai-agent-ts.git"
       branch: "main"
