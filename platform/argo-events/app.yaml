@@ -1,0 +1,9 @@
+enabled: true
+name: argo-events
+namespace: argo-events
+sourceType: external-helm
+
+chart:
+  repoURL: https://argoproj.github.io/argo-helm
+  name: argo-events
+  version: "2.4.27"

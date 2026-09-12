@@ -1,0 +1,30 @@
+# Argo Events - event sources, sensors and the EventBus CRDs
+# https://argoproj.github.io/argo-events/
+#
+# This installs the operator and CRDs only. The EventBus, EventSource and
+# Sensor instances live with the pipelines that use them, in ci-cd/.
+
+crds:
+  install: true
+  keep: true
+
+controller:
+  replicas: 1
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
+
+webhook:
+  enabled: true
+  replicas: 1
+  resources:
+    requests:
+      cpu: 20m
+      memory: 32Mi
+    limits:
+      cpu: 200m
+      memory: 128Mi
