@@ -1,0 +1,9 @@
+apiVersion: argoproj.io/v1alpha1
+kind: EventBus
+metadata:
+  # Sensors and EventSources bind to the bus named "default" unless told otherwise.
+  name: default
+spec:
+  jetstream:
+    version: {{ .Values.eventBus.jetstreamVersion | quote }}
+    replicas: {{ .Values.eventBus.replicas }}

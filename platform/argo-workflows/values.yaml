@@ -3,6 +3,9 @@
 
 controller:
   replicas: 1
+  # Namespaces where Workflows may run; the chart creates workflow RBAC in each.
+  workflowNamespaces:
+    - ci-cd
 
 server:
   replicas: 1
@@ -20,7 +23,9 @@ server:
 workflow:
   serviceAccount:
     create: true
-    name: argo-workflow
+    name: argo-ci-workflow
+  rbac:
+    create: true
 
 # Artifact storage (optional - for workflow outputs)
 # artifactRepository:

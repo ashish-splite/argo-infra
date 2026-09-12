@@ -1,0 +1,27 @@
+eventBus:
+  # Must match a version listed in the argo-events controller ConfigMap.
+  jetstreamVersion: "2.10.10"
+  replicas: 3
+
+externalSecrets:
+  enabled: true
+  refreshInterval: 1h
+  secretStoreName: vault-backend
+  dockerhub:
+    remoteKey: ci-cd/dockerhub
+    targetSecretName: dockerhub-config
+  github:
+    remoteKey: ci-cd/github
+    targetSecretName: github-credentials
+
+serviceAccounts:
+  workflow: argo-ci-workflow
+  sensor: argo-ci-sensor
+
+workflow:
+  workspaceSize: 2Gi
+  images:
+    kaniko: gcr.io/kaniko-project/executor:v1.23.2
+    git: alpine/git:2.45.2
+    yq: mikefarah/yq:4
+  registry: https://index.docker.io/v1/

@@ -1,0 +1,242 @@
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: docker-gitops
+spec:
+  serviceAccountName: {{ .Values.serviceAccounts.workflow }}
+  entrypoint: main
+
+  arguments:
+    parameters:
+      - name: appName
+      - name: repo
+      - name: branch
+        value: main
+      - name: image
+      - name: gitopsRepo
+      - name: gitopsBranch
+        value: main
+      - name: valuesFile
+      - name: imageRepoKey
+        value: .image.repository
+      - name: imageTagKey
+        value: .image.tag
+      - name: updateGitops
+        value: "true"
+
+  # DAG steps run as separate pods, so the shared workspace has to be a PVC.
+  volumeClaimTemplates:
+    - metadata:
+        name: work
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: {{ .Values.workflow.workspaceSize }}
+
+  volumes:
+    - name: dockerhub
+      secret:
+        secretName: {{ .Values.externalSecrets.dockerhub.targetSecretName }}
+        items:
+          - key: .dockerconfigjson
+            path: config.json
+
+  templates:
+
+    - name: main
+      dag:
+        tasks:
+          - name: clone
+            template: clone
+
+          - name: build
+            template: build
+            dependencies: [clone]
+            arguments:
+              parameters:
+                - name: sha
+                  value: {{ `"{{tasks.clone.outputs.parameters.sha}}"` }}
+
+          - name: gitops-clone
+            template: gitops-clone
+            dependencies: [build]
+            when: {{ `"'{{workflow.parameters.updateGitops}}' == 'true'"` }}
+
+          - name: gitops-edit
+            template: gitops-edit
+            dependencies: [gitops-clone]
+            arguments:
+              parameters:
+                - name: sha
+                  value: {{ `"{{tasks.clone.outputs.parameters.sha}}"` }}
+
+          - name: gitops-push
+            template: gitops-push
+            dependencies: [gitops-edit]
+            arguments:
+              parameters:
+                - name: sha
+                  value: {{ `"{{tasks.clone.outputs.parameters.sha}}"` }}
+
+    - name: clone
+      script:
+        image: {{ .Values.workflow.images.git }}
+        command: [sh]
+        volumeMounts:
+          - name: work
+            mountPath: /work
+        env:
+          - name: GIT_USER
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.externalSecrets.github.targetSecretName }}
+                key: username
+          - name: GIT_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.externalSecrets.github.targetSecretName }}
+                key: token
+        source: |
+          set -eu
+
+          # Keeps the token out of .git/config, argv and the workflow log.
+          cat > /work/askpass <<'ASKPASS'
+          #!/bin/sh
+          case "$1" in
+            Username*) printf '%s' "$GIT_USER" ;;
+            Password*) printf '%s' "$GIT_TOKEN" ;;
+          esac
+          ASKPASS
+          chmod 700 /work/askpass
+          export GIT_ASKPASS=/work/askpass GIT_TERMINAL_PROMPT=0
+
+          rm -rf /work/src
+          git clone --depth 1 --branch {{ `"{{workflow.parameters.branch}}"` }} \
+              {{ `"{{workflow.parameters.repo}}"` }} /work/src
+
+          git -C /work/src rev-parse --short HEAD | tr -d '\n' > /tmp/sha
+          echo "cloned $(cat /tmp/sha)"
+      outputs:
+        parameters:
+          - name: sha
+            valueFrom:
+              path: /tmp/sha
+
+    - name: build
+      inputs:
+        parameters:
+          - name: sha
+      container:
+        image: {{ .Values.workflow.images.kaniko }}
+        volumeMounts:
+          - name: work
+            mountPath: /work
+          - name: dockerhub
+            mountPath: /kaniko/.docker
+            readOnly: true
+        args:
+          - --context=dir:///work/src
+          - --dockerfile=/work/src/Dockerfile
+          - {{ `"--destination={{workflow.parameters.image}}:{{inputs.parameters.sha}}"` }}
+          - --snapshot-mode=redo
+
+    - name: gitops-clone
+      script:
+        image: {{ .Values.workflow.images.git }}
+        command: [sh]
+        volumeMounts:
+          - name: work
+            mountPath: /work
+        env:
+          - name: GIT_USER
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.externalSecrets.github.targetSecretName }}
+                key: username
+          - name: GIT_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.externalSecrets.github.targetSecretName }}
+                key: token
+        source: |
+          set -eu
+          export GIT_ASKPASS=/work/askpass GIT_TERMINAL_PROMPT=0
+
+          rm -rf /work/gitops
+          git clone --branch {{ `"{{workflow.parameters.gitopsBranch}}"` }} \
+              {{ `"{{workflow.parameters.gitopsRepo}}"` }} /work/gitops
+
+          test -f {{ `"/work/gitops/{{workflow.parameters.valuesFile}}"` }} \
+            || { echo "values file not found"; exit 1; }
+
+    - name: gitops-edit
+      inputs:
+        parameters:
+          - name: sha
+      script:
+        image: {{ .Values.workflow.images.yq }}
+        command: [sh]
+        volumeMounts:
+          - name: work
+            mountPath: /work
+        env:
+          - name: NEW_REPO
+            value: {{ `"{{workflow.parameters.image}}"` }}
+          - name: NEW_TAG
+            value: {{ `"{{inputs.parameters.sha}}"` }}
+        source: |
+          set -eu
+          # strenv() sidesteps all shell/yq quoting of the values.
+          yq eval -i \
+            {{ `"{{workflow.parameters.imageRepoKey}} = strenv(NEW_REPO) | {{workflow.parameters.imageTagKey}} = strenv(NEW_TAG)"` }} \
+            {{ `"/work/gitops/{{workflow.parameters.valuesFile}}"` }}
+          echo "updated to $NEW_REPO:$NEW_TAG"
+
+    - name: gitops-push
+      inputs:
+        parameters:
+          - name: sha
+      script:
+        image: {{ .Values.workflow.images.git }}
+        command: [sh]
+        volumeMounts:
+          - name: work
+            mountPath: /work
+        env:
+          - name: GIT_USER
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.externalSecrets.github.targetSecretName }}
+                key: username
+          - name: GIT_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.externalSecrets.github.targetSecretName }}
+                key: token
+        source: |
+          set -eu
+          export GIT_ASKPASS=/work/askpass GIT_TERMINAL_PROMPT=0
+
+          cd /work/gitops
+          git config user.email "argo-ci@local"
+          git config user.name "argo-ci"
+          git add {{ `"{{workflow.parameters.valuesFile}}"` }}
+
+          if git diff --cached --quiet; then
+            echo "already up to date - nothing to push"
+            exit 0
+          fi
+
+          git commit -m {{ `"chore({{workflow.parameters.appName}}): bump image tag to {{inputs.parameters.sha}}"` }}
+
+          # Concurrent app builds all target the same branch.
+          n=1
+          until git push origin HEAD:{{ `"{{workflow.parameters.gitopsBranch}}"` }}; do
+            n=$((n + 1))
+            if [ "$n" -gt 3 ]; then
+              echo "push failed after 3 attempts"
+              exit 1
+            fi
+            git pull --rebase origin {{ `"{{workflow.parameters.gitopsBranch}}"` }}
+          done

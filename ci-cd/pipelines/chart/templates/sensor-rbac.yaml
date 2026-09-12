@@ -1,0 +1,28 @@
+# The workflow ServiceAccount is created by the argo-workflows chart via
+# controller.workflowNamespaces. Only the Sensor identity is defined here.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .Values.serviceAccounts.sensor }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ .Values.serviceAccounts.sensor }}
+rules:
+  - apiGroups: ["argoproj.io"]
+    resources: ["workflows", "workflowtemplates"]
+    verbs: ["create", "get", "list", "watch", "update", "patch", "delete"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ .Values.serviceAccounts.sensor }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ .Values.serviceAccounts.sensor }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ .Values.serviceAccounts.sensor }}
+    namespace: {{ .Release.Namespace }}
