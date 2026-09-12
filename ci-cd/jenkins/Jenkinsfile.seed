@@ -1,0 +1,37 @@
+pipeline {
+    agent any
+
+    stages {
+
+        stage('Checkout Configuration') {
+            steps {
+                deleteDir()
+                checkout scm
+            }
+        }
+
+        stage('Generate Jobs') {
+            steps {
+                script {
+
+                    def config = readYaml(
+                        file: 'ci-cd/jenkins/library/resources/applications.yaml'
+                    )
+
+                    echo "Registered applications: ${config.applications*.name.join(', ')}"
+
+                    // DELETE makes applications.yaml authoritative: de-registering an app removes its job.
+                    jobDsl(
+                        targets: 'ci-cd/jenkins/resources/jobs/generate.groovy',
+                        removedJobAction: 'DELETE',
+                        removedViewAction: 'IGNORE',
+                        lookupStrategy: 'JENKINS_ROOT',
+                        additionalParameters: [
+                            applications: config.applications
+                        ]
+                    )
+                }
+            }
+        }
+    }
+}

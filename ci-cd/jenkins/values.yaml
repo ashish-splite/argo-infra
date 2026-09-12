@@ -13,6 +13,61 @@ controller:
     - workflow-aggregator
     - git
     - configuration-as-code
+    - job-dsl
+    - pipeline-utility-steps
+    - pipeline-groovy-lib
+
+  JCasC:
+    defaultConfig: true
+    configScripts:
+
+      shared-library: |
+        unclassified:
+          globalLibraries:
+            libraries:
+              - name: pipeline-library
+                defaultVersion: main
+                implicit: false
+                allowVersionOverride: true
+                includeInChangesets: true
+                retriever:
+                  modernSCM:
+                    # vars/ and resources/ live here, not at the repo root
+                    libraryPath: "ci-cd/jenkins/library"
+                    scm:
+                      git:
+                        remote: "https://github.com/ashish-splite/argo-infra.git"
+                        credentialsId: "github-credentials"
+                        traits:
+                          - gitBranchDiscovery
+
+      job-dsl-security: |
+        security:
+          globalJobDslSecurityConfiguration:
+            # Seed DSL comes from this repo only; avoids manual approval on every rebuild.
+            useScriptSecurity: false
+
+      seed-job: |
+        jobs:
+          - script: |
+              pipelineJob('seed') {
+                  description('Generates per-application CI jobs from applications.yaml')
+                  definition {
+                      cpsScm {
+                          scm {
+                              git {
+                                  remote {
+                                      url('https://github.com/ashish-splite/argo-infra.git')
+                                      credentials('github-credentials')
+                                  }
+                                  branch('main')
+                              }
+                          }
+                          scriptPath('ci-cd/jenkins/Jenkinsfile.seed')
+                          lightweight(false)
+                      }
+                  }
+              }
 
   # Reasonable for Minikube
   resources:
