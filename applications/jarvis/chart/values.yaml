@@ -29,3 +29,15 @@ ingress:
   enabled: true
   className: nginx
   host: jarvis.local
+
+# CI trigger. Lives with the app so it is created and removed alongside it.
+ci:
+  enabled: true
+  namespace: ci-cd
+  serviceAccount: argo-ci-sensor
+  workflowTemplate: docker-gitops
+  repository: ashish-splite/ai-agent-ts
+  branch: main
+  gitopsRepo: https://github.com/ashish-splite/argo-infra.git
+  gitopsBranch: main
+  valuesFile: applications/jarvis/chart/values.yaml

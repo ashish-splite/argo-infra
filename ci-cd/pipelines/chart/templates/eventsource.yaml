@@ -9,23 +9,26 @@ spec:
         port: {{ .Values.webhook.port }}
         targetPort: {{ .Values.webhook.port }}
   github:
-    {{- range .Values.apps }}
-    # An apiToken is present, so argo-events registers this hook on GitHub itself.
-    {{ .repository }}:
+    # One endpoint for every repo; Sensors discriminate on repository.full_name.
+    push:
       repositories:
+        {{- range .Values.webhook.repositories }}
         - owner: {{ .owner }}
           names:
-            - {{ .repository }}
+            {{- range .names }}
+            - {{ . }}
+            {{- end }}
+        {{- end }}
       webhook:
-        endpoint: {{ $.Values.webhook.basePath }}/{{ .repository }}
-        port: "{{ $.Values.webhook.port }}"
+        endpoint: {{ .Values.webhook.path }}
+        port: "{{ .Values.webhook.port }}"
         method: POST
-        url: {{ $.Values.webhook.url | quote }}
+        url: {{ .Values.webhook.url | quote }}
       events:
         - push
+      # An apiToken is present, so argo-events registers the hooks on GitHub itself.
       apiToken:
-        name: {{ $.Values.externalSecrets.github.targetSecretName }}
+        name: {{ .Values.externalSecrets.github.targetSecretName }}
         key: token
       contentType: json
       active: true
-    {{- end }}

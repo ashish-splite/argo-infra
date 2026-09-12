@@ -9,7 +9,7 @@ spec:
   rules:
     - http:
         paths:
-          - path: {{ .Values.webhook.basePath }}
+          - path: {{ .Values.webhook.path }}
             pathType: Prefix
             backend:
               service:

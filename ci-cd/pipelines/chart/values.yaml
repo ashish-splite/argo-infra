@@ -29,23 +29,14 @@ workflow:
 webhook:
   # Public URL GitHub posts to. ngrok in local dev; a real DNS name elsewhere.
   url: "https://4d2b-2406-7400-11d-d65f-b54f-13f9-e33e-bbd8.ngrok-free.app"
-  basePath: /push
+  path: /push
   port: 12000
   ingress:
     enabled: true
     className: nginx
-
-# Where every app's image tag gets committed.
-gitops:
-  repository: https://github.com/ashish-splite/argo-infra.git
-  branch: main
-
-# Registry of applications with commit-triggered CI.
-apps:
-  - name: jarvis
-    owner: ashish-splite
-    repository: ai-agent-ts
-    branch: main
-    image: thedarkest22/jarvis
-    valuesFile: applications/jarvis/chart/values.yaml
+  # Only the hook registration surface. Per-app CI config lives in the app's chart.
+  repositories:
+    - owner: ashish-splite
+      names:
+        - ai-agent-ts
 
