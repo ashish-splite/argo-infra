@@ -16,6 +16,7 @@ controller:
     - job-dsl
     - pipeline-utility-steps
     - pipeline-groovy-lib
+    - github-branch-source
 
   JCasC:
     defaultConfig: true
@@ -33,7 +34,7 @@ controller:
                 retriever:
                   modernSCM:
                     # vars/ and resources/ live here, not at the repo root
-                    libraryPath: "ci-cd/jenkins/library"
+                    libraryPath: "ci-cd/jenkins/resources/library"
                     scm:
                       git:
                         remote: "https://github.com/ashish-splite/argo-infra.git"
@@ -63,7 +64,7 @@ controller:
                                   branch('main')
                               }
                           }
-                          scriptPath('ci-cd/jenkins/Jenkinsfile.seed')
+                          scriptPath('ci-cd/jenkins/resources/Jenkinsfile.seed')
                           lightweight(false)
                       }
                   }

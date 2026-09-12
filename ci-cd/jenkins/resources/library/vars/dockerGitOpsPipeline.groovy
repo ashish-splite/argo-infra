@@ -9,9 +9,16 @@ def call(Map args = [:]) {
     String buildContext = args.context ?: '.'
     String testCommand = args.testCommand
 
-    node {
-        // brew-launched Jenkins runs with a minimal PATH that excludes docker and git.
-        withEnv(['PATH+LOCAL=/usr/local/bin:/opt/homebrew/bin']) {
+    podTemplate(containers: [
+        containerTemplate(name: 'kaniko',
+                          image: 'gcr.io/kaniko-project/executor:v1.23.2-debug',
+                          command: 'sleep', args: '9999999', ttyEnabled: true),
+        containerTemplate(name: 'yq',
+                          image: 'mikefarah/yq:4',
+                          command: 'sleep', args: '9999999', ttyEnabled: true)
+    ]) {
+
+        node(POD_LABEL) {
 
             stage('Resolve Configuration') {
 
@@ -35,8 +42,6 @@ def call(Map args = [:]) {
                     image repo  : ${env.IMAGE_REPO}
                     gitops repo : ${env.GITOPS_REPO}
                     values file : ${env.GITOPS_VALUES_FILE}
-                    repo key    : ${env.GITOPS_IMAGE_REPO_KEY}
-                    tag key     : ${env.GITOPS_IMAGE_TAG_KEY}
                 """.stripIndent()
             }
 
@@ -65,35 +70,46 @@ def call(Map args = [:]) {
 
             stage('Build & Push Image') {
 
-                withCredentials([
-                    usernamePassword(
-                        credentialsId: 'dockerhub-credentials',
-                        usernameVariable: 'DOCKER_USER',
-                        passwordVariable: 'DOCKER_PASS'
-                    )
-                ]) {
-                    withEnv(["DOCKERFILE=${dockerfile}", "BUILD_CONTEXT=${buildContext}"]) {
-                        sh '''
-                            set -eu
+                container('kaniko') {
+                    withCredentials([
+                        usernamePassword(
+                            credentialsId: 'dockerhub-credentials',
+                            usernameVariable: 'DOCKER_USER',
+                            passwordVariable: 'DOCKER_PASS'
+                        )
+                    ]) {
+                        withEnv(["DOCKERFILE=${dockerfile}", "BUILD_CONTEXT=${buildContext}"]) {
+                            sh '''
+                                set -eu
 
-                            echo "$DOCKER_PASS" | docker login \
-                                --username "$DOCKER_USER" \
-                                --password-stdin
+                                mkdir -p /kaniko/.docker
+                                AUTH=$(printf '%s:%s' "$DOCKER_USER" "$DOCKER_PASS" \
+                                       | base64 | tr -d '\\n')
+                                cat > /kaniko/.docker/config.json <<CFG
+                                {"auths":{"https://index.docker.io/v1/":{"auth":"$AUTH"}}}
+CFG
 
-                            trap 'docker logout >/dev/null 2>&1 || true' EXIT
-
-                            docker build \
-                                --file "$DOCKERFILE" \
-                                --tag "$IMAGE" \
-                                "$BUILD_CONTEXT"
-
-                            docker push "$IMAGE"
-                        '''
+                                /kaniko/executor \
+                                    --context "dir://$WORKSPACE/$BUILD_CONTEXT" \
+                                    --dockerfile "$WORKSPACE/$DOCKERFILE" \
+                                    --destination "$IMAGE" \
+                                    --cache=true \
+                                    --snapshot-mode=redo
+                            '''
+                        }
                     }
                 }
             }
 
+            // The multibranch job has no parameters and always publishes; the manual job opts in.
+            boolean updateGitOps = (params.UPDATE_GITOPS == null) ? true : params.UPDATE_GITOPS
+
             stage('Update GitOps') {
+
+                if (!updateGitOps) {
+                    echo "UPDATE_GITOPS is false - ${env.IMAGE} pushed, GitOps left untouched"
+                    return
+                }
 
                 withCredentials([
                     usernamePassword(
@@ -102,6 +118,7 @@ def call(Map args = [:]) {
                         passwordVariable: 'GIT_TOKEN'
                     )
                 ]) {
+
                     sh '''
                         set -eu
 
@@ -116,26 +133,32 @@ case "$1" in
 esac
 ASKPASS
                         chmod 700 .git-askpass
-                        export GIT_ASKPASS="$PWD/.git-askpass"
-                        export GIT_TERMINAL_PROMPT=0
 
-                        git clone --branch "$GITOPS_BRANCH" "$GITOPS_REPO" gitops
+                        GIT_ASKPASS="$PWD/.git-askpass" GIT_TERMINAL_PROMPT=0 \
+                            git clone --branch "$GITOPS_BRANCH" "$GITOPS_REPO" gitops
+
+                        test -f "gitops/$GITOPS_VALUES_FILE" \
+                            || { echo "values file not found: $GITOPS_VALUES_FILE"; exit 1; }
+                    '''
+
+                    // strenv() sidesteps all shell/yq quoting of the values.
+                    container('yq') {
+                        withEnv(["NEW_REPO=${env.IMAGE_REPO}", "NEW_TAG=${env.GIT_SHA}"]) {
+                            sh '''
+                                set -eu
+                                yq eval -i \
+                                    "$GITOPS_IMAGE_REPO_KEY = strenv(NEW_REPO) | $GITOPS_IMAGE_TAG_KEY = strenv(NEW_TAG)" \
+                                    "gitops/$GITOPS_VALUES_FILE"
+                            '''
+                        }
+                    }
+
+                    sh '''
+                        set -eu
+
                         cd gitops
-
-                        if [ ! -f "$GITOPS_VALUES_FILE" ]; then
-                            echo "values file not found: $GITOPS_VALUES_FILE"
-                            exit 1
-                        fi
-
-                        # strenv() sidesteps all shell/yq quoting of the values.
-                        docker run --rm \
-                            -e NEW_REPO="$IMAGE_REPO" \
-                            -e NEW_TAG="$GIT_SHA" \
-                            -v "$WORKSPACE/gitops:/workdir" \
-                            mikefarah/yq \
-                            eval -i \
-                            "$GITOPS_IMAGE_REPO_KEY = strenv(NEW_REPO) | $GITOPS_IMAGE_TAG_KEY = strenv(NEW_TAG)" \
-                            "/workdir/$GITOPS_VALUES_FILE"
+                        export GIT_ASKPASS="$WORKSPACE/.git-askpass"
+                        export GIT_TERMINAL_PROMPT=0
 
                         git config user.email "jenkins-ci@local"
                         git config user.name "jenkins-ci"
@@ -168,9 +191,7 @@ ASKPASS
 
                 application : ${env.APP_NAME}
                 image       : ${env.IMAGE}
-                values file : ${env.GITOPS_VALUES_FILE}
-
-                Argo CD will pick up the GitOps commit and sync.
+                gitops      : ${updateGitOps ? env.GITOPS_VALUES_FILE : 'not updated'}
             """.stripIndent()
         }
     }

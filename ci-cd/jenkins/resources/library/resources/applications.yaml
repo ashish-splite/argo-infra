@@ -3,7 +3,8 @@ applications:
   - name: jarvis
 
     source:
-      repository: "https://github.com/ashish-splite/ai-agent-ts.git"
+      owner: "ashish-splite"
+      repository: "ai-agent-ts"
       branch: "main"
 
     image:

@@ -4,16 +4,35 @@ folder('applications') {
 
 applications.each { app ->
 
+    def defaultBranch = app.source.branch ?: 'main'
+    def cloneUrl = "https://github.com/${app.source.owner}/${app.source.repository}.git"
+
     multibranchPipelineJob("applications/${app.name}") {
 
-        description("CI for ${app.name}. Pipeline logic lives in the pipeline-library shared library.")
+        description("Automatic CI for ${app.name} on ${defaultBranch}. Pipeline logic lives in the pipeline-library shared library.")
 
         branchSources {
-            git {
-                id(app.name)
-                remote(app.source.repository)
-                credentialsId('github-credentials')
-                includes(app.source.branch ?: 'main')
+            branchSource {
+                source {
+                    github {
+                        id(app.name)
+                        repoOwner(app.source.owner)
+                        repository(app.source.repository)
+                        repositoryUrl(cloneUrl)
+                        configuredByUrl(false)
+                        credentialsId('github-credentials')
+
+                        traits {
+                            gitHubBranchDiscovery {
+                                strategyId(1)
+                            }
+                            headWildcardFilter {
+                                includes(defaultBranch)
+                                excludes('')
+                            }
+                        }
+                    }
+                }
             }
         }
 
@@ -33,6 +52,39 @@ applications.each { app ->
             periodicFolderTrigger {
                 interval('5m')
             }
+        }
+    }
+
+    pipelineJob("applications/${app.name}-manual") {
+
+        description("On-demand CI for ${app.name}. Builds any branch; the GitOps bump is opt-in.")
+
+        parameters {
+            stringParam('BRANCH', defaultBranch,
+                        'Branch to fetch the Jenkinsfile from and build')
+            booleanParam('UPDATE_GITOPS', false,
+                         'Bump the image tag in the GitOps repo after pushing')
+        }
+
+        definition {
+            cpsScm {
+                scm {
+                    git {
+                        remote {
+                            url(cloneUrl)
+                            credentials('github-credentials')
+                        }
+                        // Expanded per build from the BRANCH parameter.
+                        branch('${BRANCH}')
+                    }
+                }
+                scriptPath('Jenkinsfile')
+                lightweight(true)
+            }
+        }
+
+        logRotator {
+            numToKeep(20)
         }
     }
 }

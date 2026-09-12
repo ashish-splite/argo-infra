@@ -15,7 +15,7 @@ pipeline {
                 script {
 
                     def config = readYaml(
-                        file: 'ci-cd/jenkins/library/resources/applications.yaml'
+                        file: 'ci-cd/jenkins/resources/library/resources/applications.yaml'
                     )
 
                     echo "Registered applications: ${config.applications*.name.join(', ')}"
