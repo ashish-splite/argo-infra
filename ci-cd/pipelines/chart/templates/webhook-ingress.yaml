@@ -1,0 +1,19 @@
+{{- if .Values.webhook.ingress.enabled }}
+# Host-less so it matches whatever Host ngrok forwards.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: github-webhook
+spec:
+  ingressClassName: {{ .Values.webhook.ingress.className }}
+  rules:
+    - http:
+        paths:
+          - path: {{ .Values.webhook.basePath }}
+            pathType: Prefix
+            backend:
+              service:
+                name: github-eventsource-svc
+                port:
+                  number: {{ .Values.webhook.port }}
+{{- end }}

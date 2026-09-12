@@ -1,0 +1,31 @@
+apiVersion: argoproj.io/v1alpha1
+kind: EventSource
+metadata:
+  name: github
+spec:
+  service:
+    ports:
+      - name: webhook
+        port: {{ .Values.webhook.port }}
+        targetPort: {{ .Values.webhook.port }}
+  github:
+    {{- range .Values.apps }}
+    # An apiToken is present, so argo-events registers this hook on GitHub itself.
+    {{ .repository }}:
+      repositories:
+        - owner: {{ .owner }}
+          names:
+            - {{ .repository }}
+      webhook:
+        endpoint: {{ $.Values.webhook.basePath }}/{{ .repository }}
+        port: "{{ $.Values.webhook.port }}"
+        method: POST
+        url: {{ $.Values.webhook.url | quote }}
+      events:
+        - push
+      apiToken:
+        name: {{ $.Values.externalSecrets.github.targetSecretName }}
+        key: token
+      contentType: json
+      active: true
+    {{- end }}

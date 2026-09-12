@@ -1,0 +1,54 @@
+{{- range .Values.apps }}
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: {{ .name }}
+spec:
+  template:
+    serviceAccountName: {{ $.Values.serviceAccounts.sensor }}
+
+  dependencies:
+    - name: push
+      eventSourceName: github
+      eventName: {{ .repository }}
+      filters:
+        data:
+          - path: body.ref
+            type: string
+            value:
+              - refs/heads/{{ .branch }}
+
+  triggers:
+    - template:
+        name: {{ .name }}-ci
+        k8s:
+          operation: create
+          source:
+            resource:
+              apiVersion: argoproj.io/v1alpha1
+              kind: Workflow
+              metadata:
+                generateName: {{ .name }}-ci-
+              spec:
+                workflowTemplateRef:
+                  name: docker-gitops
+                arguments:
+                  parameters:
+                    - name: appName
+                      value: {{ .name }}
+                    - name: repo
+                      value: https://github.com/{{ .owner }}/{{ .repository }}.git
+                    - name: branch
+                      value: {{ .branch }}
+                    - name: image
+                      value: {{ .image }}
+                    - name: gitopsRepo
+                      value: {{ $.Values.gitops.repository }}
+                    - name: gitopsBranch
+                      value: {{ $.Values.gitops.branch }}
+                    - name: valuesFile
+                      value: {{ .valuesFile }}
+                    - name: updateGitops
+                      value: "true"
+{{- end }}
