@@ -1,14 +1,11 @@
 replicaCount: 1
-
 image:
   repository: thedarkest22/chat-interface
-  tag: "latest"
+  tag: "72285e3"
   pullPolicy: Always
-
 service:
   type: ClusterIP
   port: 80
-
 resources:
   requests:
     cpu: 50m
@@ -16,16 +13,13 @@ resources:
   limits:
     cpu: 200m
     memory: 256Mi
-
 env:
   NODE_ENV: production
   LOG_LEVEL: info
-
 ingress:
   enabled: true
   className: nginx
   host: chat-app.local
-
 ci:
   enabled: true
   namespace: ci-cd
