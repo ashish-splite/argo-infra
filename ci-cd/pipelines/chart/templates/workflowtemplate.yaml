@@ -24,6 +24,10 @@ spec:
       - name: updateGitops
         value: "true"
 
+  ttlStrategy:
+    secondsAfterSuccess: {{ .Values.workflow.ttl.secondsAfterSuccess }}
+    secondsAfterFailure: {{ .Values.workflow.ttl.secondsAfterFailure }}
+
   # DAG steps run as separate pods, so the shared workspace has to be a PVC.
   volumeClaimTemplates:
     - metadata:

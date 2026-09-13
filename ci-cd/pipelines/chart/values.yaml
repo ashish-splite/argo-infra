@@ -20,6 +20,10 @@ serviceAccounts:
 
 workflow:
   workspaceSize: 2Gi
+  # Failures are kept longer than successes; pod logs die with the Workflow.
+  ttl:
+    secondsAfterSuccess: 86400
+    secondsAfterFailure: 259200
   images:
     kaniko: gcr.io/kaniko-project/executor:v1.23.2
     git: alpine/git:2.45.2
