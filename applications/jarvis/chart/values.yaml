@@ -1,7 +1,7 @@
 replicaCount: 1
 image:
   repository: thedarkest22/jarvis # Docker Hub
-  tag: "1c82929"
+  tag: "709ef87"
   pullPolicy: Always
 service:
   type: ClusterIP
@@ -29,7 +29,6 @@ ingress:
   enabled: true
   className: nginx
   host: jarvis.local
-
 # CI trigger. Lives with the app so it is created and removed alongside it.
 ci:
   enabled: true
