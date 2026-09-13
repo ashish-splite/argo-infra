@@ -32,7 +32,7 @@ workflow:
 
 webhook:
   # Public URL GitHub posts to. ngrok in local dev; a real DNS name elsewhere.
-  url: "https://4d2b-2406-7400-11d-d65f-b54f-13f9-e33e-bbd8.ngrok-free.app"
+  url: "https://f8bb-2406-7400-11d-d65f-ac76-493d-a620-635e.ngrok-free.app"
   path: /push
   port: 12000
   ingress:
@@ -43,7 +43,5 @@ webhook:
     - owner: ashish-splite
       names:
         - ai-agent-ts
-    - owner: ashish-splite
-      names:
         - agentic-ui
 
