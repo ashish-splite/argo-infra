@@ -1,4 +1,4 @@
 enabled: true
-name: pipelines
+name: argo-pipeline
 namespace: ci-cd
 sourceType: git

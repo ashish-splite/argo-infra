@@ -1,5 +1,5 @@
 apiVersion: v2
-name: pipelines
+name: argo-pipeline
 description: Argo Workflows CI pipelines and the Argo Events plumbing that triggers them
 type: application
 version: 0.1.0

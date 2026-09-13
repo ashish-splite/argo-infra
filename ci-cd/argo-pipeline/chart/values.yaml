@@ -43,4 +43,7 @@ webhook:
     - owner: ashish-splite
       names:
         - ai-agent-ts
+    - owner: ashish-splite
+      names:
+        - agentic-ui
 

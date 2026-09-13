@@ -1,0 +1,60 @@
+{{- if .Values.ci.enabled }}
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: {{ .Release.Name }}
+  # Sensors must sit beside the EventBus, which is namespace-scoped.
+  namespace: {{ .Values.ci.namespace }}
+spec:
+  template:
+    serviceAccountName: {{ .Values.ci.serviceAccount }}
+
+  dependencies:
+    - name: push
+      eventSourceName: github
+      eventName: push
+      filters:
+        dataLogicalOperator: and
+        data:
+          - path: body.repository.full_name
+            type: string
+            value:
+              - {{ .Values.ci.repository }}
+          - path: body.ref
+            type: string
+            value:
+              - refs/heads/{{ .Values.ci.branch }}
+
+  triggers:
+    - template:
+        name: {{ .Release.Name }}-ci
+        k8s:
+          operation: create
+          source:
+            resource:
+              apiVersion: argoproj.io/v1alpha1
+              kind: Workflow
+              metadata:
+                generateName: {{ .Release.Name }}-ci-
+              spec:
+                workflowTemplateRef:
+                  name: {{ .Values.ci.workflowTemplate }}
+                arguments:
+                  parameters:
+                    - name: appName
+                      value: {{ .Release.Name }}
+                    - name: repo
+                      value: https://github.com/{{ .Values.ci.repository }}.git
+                    - name: branch
+                      value: {{ .Values.ci.branch }}
+                    - name: image
+                      value: {{ .Values.image.repository }}
+                    - name: gitopsRepo
+                      value: {{ .Values.ci.gitopsRepo }}
+                    - name: gitopsBranch
+                      value: {{ .Values.ci.gitopsBranch }}
+                    - name: valuesFile
+                      value: {{ .Values.ci.valuesFile }}
+                    - name: updateGitops
+                      value: "true"
+{{- end }}

@@ -25,3 +25,14 @@ ingress:
   enabled: true
   className: nginx
   host: chat-app.local
+
+ci:
+  enabled: true
+  namespace: ci-cd
+  serviceAccount: argo-ci-sensor
+  workflowTemplate: docker-gitops
+  repository: ashish-splite/agentic-ui
+  branch: main
+  gitopsRepo: https://github.com/ashish-splite/argo-infra.git
+  gitopsBranch: main
+  valuesFile: applications/chat-app/chart/values.yaml
