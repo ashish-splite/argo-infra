@@ -2,6 +2,11 @@ controller:
   # Local Minikube: one replica is enough.
   replicaCount: 1
 
+  admissionWebhooks:
+    patch:
+      # Chart default is 0, which deletes the Job before Argo CD sees the hook finish.
+      ttlSecondsAfterFinished: 60
+
   # Keep the production-style Service type.
   # minikube tunnel will provide the external connectivity.
   service:
