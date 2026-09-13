@@ -2,10 +2,11 @@ controller:
   # Local Minikube: one replica is enough.
   replicaCount: 1
 
+  # The cert Job hardcodes ttlSecondsAfterFinished: 0, so it self-deletes before
+  # Argo CD observes the hook finishing and the sync hangs. Ingress validation is
+  # not worth that on a local cluster.
   admissionWebhooks:
-    patch:
-      # Chart default is 0, which deletes the Job before Argo CD sees the hook finish.
-      ttlSecondsAfterFinished: 60
+    enabled: false
 
   # Keep the production-style Service type.
   # minikube tunnel will provide the external connectivity.
