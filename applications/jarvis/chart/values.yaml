@@ -18,6 +18,9 @@ externalSecret:
   refreshInterval: 1m
   secretStoreName: vault-backend
   remoteKey: jarvis/app
+  remoteProperty: config
+  configKey: config.yaml
+  mountPath: /etc/jarvis
   targetSecretName: jarvis-env
 # Stakater Reloader restarts the Deployment when the ESO-managed Secret changes.
 reloader:
@@ -31,7 +34,7 @@ ingress:
   host: jarvis.local
 # CI trigger. Lives with the app so it is created and removed alongside it.
 ci:
-  enabled: true
+  enabled: false
   namespace: ci-cd
   serviceAccount: argo-ci-sensor
   workflowTemplate: docker-gitops

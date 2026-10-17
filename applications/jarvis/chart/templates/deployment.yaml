@@ -25,6 +25,13 @@ spec:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args:
+            - --app
+            - http
+            {{- if .Values.externalSecret.enabled }}
+            - --config
+            - {{ printf "%s/%s" (trimSuffix "/" .Values.externalSecret.mountPath) .Values.externalSecret.configKey | quote }}
+            {{- end }}
           ports:
             - name: http
               containerPort: {{ .Values.service.port }}
@@ -33,9 +40,10 @@ spec:
             {{- toYaml .Values.resources | nindent 12 }}
           {{- end }}
           {{- if .Values.externalSecret.enabled }}
-          envFrom:
-            - secretRef:
-                name: {{ .Values.externalSecret.targetSecretName }}
+          volumeMounts:
+            - name: app-config
+              mountPath: {{ .Values.externalSecret.mountPath | quote }}
+              readOnly: true
           {{- end }}
           {{- if .Values.env }}
           env:
@@ -44,3 +52,12 @@ spec:
               value: {{ $value | quote }}
             {{- end }}
           {{- end }}
+      {{- if .Values.externalSecret.enabled }}
+      volumes:
+        - name: app-config
+          secret:
+            secretName: {{ .Values.externalSecret.targetSecretName }}
+            items:
+              - key: {{ .Values.externalSecret.configKey | quote }}
+                path: {{ .Values.externalSecret.configKey | quote }}
+      {{- end }}
