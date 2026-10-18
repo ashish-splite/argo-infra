@@ -1,7 +1,7 @@
 replicaCount: 1
 image:
   repository: thedarkest22/jarvis # Docker Hub
-  tag: "latest"
+  tag: "72145755d159e0e820ea06bfb73b625ab4f1d096"
   pullPolicy: Always
 service:
   type: ClusterIP
