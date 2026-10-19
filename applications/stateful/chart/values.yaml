@@ -1,7 +1,7 @@
 replicaCount: 2
 image:
   repository: thedarkest22/jarvis
-  tag: "2a5d609774090dd1dee1239bb8adf78fe4969958"
+  tag: "1d1d8887c4925f1da77e9c4405cf58b523f04d5e"
   pullPolicy: Always
 worker:
   app: worker
