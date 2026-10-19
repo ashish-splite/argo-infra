@@ -4,7 +4,7 @@ metadata:
   name: stateful
 spec:
   serviceName: stateful
-  replicas: 2
+  replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
       app: stateful
@@ -13,42 +13,25 @@ spec:
       labels:
         app: stateful
     spec:
-      initContainers:
-        - name: initialize-content
-          image: nginx:1.28-alpine
-          command:
-            - /bin/sh
-            - -c
-          args:
-            - |
-              if [ ! -f /data/index.html ]; then
-                printf 'Persistent storage for %s\n' "$HOSTNAME" > /data/index.html
-              fi
-          volumeMounts:
-            - name: data
-              mountPath: /data
       containers:
-        - name: nginx
-          image: nginx:1.28-alpine
-          ports:
-            - name: http
-              containerPort: 80
-          readinessProbe:
-            httpGet:
-              path: /
-              port: http
-            initialDelaySeconds: 2
-            periodSeconds: 5
+        - name: jarvis
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args:
+            - --app
+            - {{ .Values.worker.app | quote }}
+            - --data
+            - {{ .Values.persistence.mountPath | quote }}
           volumeMounts:
             - name: data
-              mountPath: /usr/share/nginx/html
+              mountPath: {{ .Values.persistence.mountPath | quote }}
   volumeClaimTemplates:
     - metadata:
         name: data
       spec:
         accessModes:
-          - ReadWriteOnce
-        storageClassName: stateful-hostpath
+          {{- toYaml .Values.persistence.accessModes | nindent 10 }}
+        storageClassName: {{ .Values.storageClass.name | quote }}
         resources:
           requests:
-            storage: 1Gi
+            storage: {{ .Values.persistence.size | quote }}
