@@ -133,12 +133,15 @@ observability/    prometheus (on)
 Prometheus Operator, Prometheus, Alertmanager, Grafana, kube-state-metrics,
 Node Exporter, and the bundled cluster dashboards and alert rules.
 
-Before pushing the enabled Application, create the `observability` namespace
-and a Secret named `grafana-admin` in it, containing `admin-user` and
-`admin-password` keys. Provision the credential outside Git, or through an
-ExternalSecret backed by Vault. The chart references this Secret rather than
-generating a password on every Argo CD render. Grafana cannot start until the
-Secret exists.
+Grafana temporarily allows anonymous Viewer access for local development. Its
+chart-managed admin credential is a fixed local-only fallback; no manually
+created `grafana-admin` Secret is required. Before exposing Grafana outside the
+local environment, disable anonymous access, remove the local admin password,
+and configure `grafana.admin.existingSecret: grafana-admin` with `userKey:
+admin-user` and `passwordKey: admin-password`. Provision that Secret outside
+Git or through an ExternalSecret backed by Vault. For an initialized Grafana
+database, rotate the admin password explicitly; changing provisioning credentials
+alone does not reset the stored password.
 
 The single-replica configuration is sized for local Minikube, not production HA.
 PVCs use the cluster's default StorageClass: Prometheus requests 10Gi,

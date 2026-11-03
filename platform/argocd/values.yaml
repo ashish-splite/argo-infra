@@ -21,6 +21,9 @@ controller:
 # Repo server
 repoServer:
   replicas: 1
+  env:
+    - name: ARGOCD_EXEC_TIMEOUT
+      value: "180s"
 
 # ApplicationSet controller
 applicationSet:
@@ -43,6 +46,8 @@ configs:
   params:
     # Allow insecure connections (for local dev without TLS)
     server.insecure: true
+    controller.repo.server.timeout.seconds: "240"
+    server.repo.server.timeout.seconds: "240"
 
   secret:
     # Local-dev only: bcrypt hash of "admin". Bump mtime to force a credential refresh.

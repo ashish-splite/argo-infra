@@ -81,11 +81,7 @@ alertmanager:
 
 grafana:
   enabled: true
-  adminPassword: ""
-  admin:
-    existingSecret: grafana-admin
-    userKey: admin-user
-    passwordKey: admin-password
+  adminPassword: local-dev-only
   defaultDashboardsEnabled: true
   defaultDashboardsTimezone: utc
   service:
@@ -123,7 +119,8 @@ grafana:
     users:
       allow_sign_up: false
     auth.anonymous:
-      enabled: false
+      enabled: true
+      org_role: Viewer
     analytics:
       reporting_enabled: false
       check_for_updates: false
