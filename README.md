@@ -124,8 +124,49 @@ ci-cd/
   jenkins/                      # DISABLED - superseded, kept for reference
 
 datastores/       redis (on), postgres (off)
-observability/    prometheus (off)
+observability/    prometheus (on)
 ```
+
+### Monitoring stack
+
+`observability/prometheus` deploys kube-prometheus-stack chart version `69.8.2`:
+Prometheus Operator, Prometheus, Alertmanager, Grafana, kube-state-metrics,
+Node Exporter, and the bundled cluster dashboards and alert rules.
+
+Before pushing the enabled Application, create the `observability` namespace
+and a Secret named `grafana-admin` in it, containing `admin-user` and
+`admin-password` keys. Provision the credential outside Git, or through an
+ExternalSecret backed by Vault. The chart references this Secret rather than
+generating a password on every Argo CD render. Grafana cannot start until the
+Secret exists.
+
+The single-replica configuration is sized for local Minikube, not production HA.
+PVCs use the cluster's default StorageClass: Prometheus requests 10Gi,
+Alertmanager 1Gi, and Grafana 1Gi. Check `kubectl get storageclass` before sync.
+Prometheus retains metrics for up to 7 days or 8GB, whichever is reached first;
+leave disk headroom for the WAL and compaction. Local hostpath storage is not a
+backup and does not survive cluster deletion reliably.
+
+With `minikube tunnel` running, resolve `grafana.local` to `127.0.0.1` and open
+`http://grafana.local`. This local HTTP ingress is not suitable for public
+exposure; add TLS before using it beyond the local environment. Prometheus and
+Alertmanager remain ClusterIP-only and can be accessed using port forwarding:
+
+```bash
+kubectl -n observability port-forward svc/prometheus-kube-prometheus-prometheus 9090:9090
+kubectl -n observability port-forward svc/prometheus-kube-prometheus-alertmanager 9093:9093
+```
+
+Prometheus discovers ServiceMonitors, PodMonitors, and PrometheusRules across
+namespaces when labeled `release: prometheus`. Applications still need to expose
+metrics and define their own monitors. Alertmanager uses the upstream default
+null receiver until an actual notification destination is configured; alerts
+are visible in the UI but no notifications are delivered. Some control-plane
+targets may be unavailable depending on Minikube's metrics endpoint bindings;
+check Prometheus Targets after sync before changing the corresponding monitors.
+
+Disabling this Application is not a pause: treat it as a destructive operation,
+especially for Grafana's PVC. Back up data before deleting or pruning resources.
 
 ---
 
